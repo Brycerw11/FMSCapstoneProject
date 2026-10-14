@@ -3,6 +3,46 @@ html, body {
     padding: 0;
 }
 
+/* #region Kanit CSS Font Styles */
+
+.kanit{
+    font-family: "Kanit", "sans-serif";
+}
+
+/* #endregion */
+
+/* #region Site Header CSS */
+header{
+    width: 100%;
+    background-color: #76a5af;
+    height: 15vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+header#logo-container{
+    
+}
+
+header#site-title-container{
+    display: flex;
+    align-content: center;
+}
+header h1, header h2{
+    margin: 0;
+    text-align: center;
+}
+header h1{
+    background-color: #45818e;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-radius: 0.55rem;
+}
+
+/* #endregion */
+
+/* p5.js CSS for canvases */
 canvas {
     display: block;
 }

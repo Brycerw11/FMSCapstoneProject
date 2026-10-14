@@ -1,3 +1,7 @@
+/* 
+	Exercise 3 Description: 
+*/	
+
 function setup() {
 	createCanvas(400, 400);
 }
