@@ -17,18 +17,30 @@ body{
 
 /* #region Site Header CSS */
 header{
-    width: 100%;
-    background-color: #76a5af;
-    height: 15vh;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    
+    --x-padding: 1rem;
+    width: calc(calc(100% - var(--x-padding)) - var(--x-padding));
+    height: 18vh;
+    padding: 0 var(--x-padding) 0 var(--x-padding);
 
-    border-bottom: 3px #FFFFFF dashed;
+    border-bottom: 4px #FFFFFF dashed;
+
+    background-color: #76a5af;
 }
 
-header#logo-container{
-    
+#logo-image{
+    /* background-color: #FFFFFF; */
+
+    width: 9vh;
+    height: 9vh;
+
+    /* margin: 0 2rem 0 2rem; */
+
+    border: 3px #FFFFFF solid;
+    border-radius: 100%;
 }
 
 header#site-title-container{
@@ -42,11 +54,22 @@ header h1, header h2{
     margin: 0;
     text-align: center;
 }
-header h1{
+#site-title{
     background-color: #45818e;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding: 0.25rem 2rem 0.25rem 2rem;
+    
+    border: 3px solid #FFFFFF;
     border-radius: 0.55rem;
+}
+
+/* Header CSS for Mobile Screens */
+@media only screen and (max-width: 600px) {
+    header h1{
+        font-size: 1.5em;
+    }
+    header h2{
+        font-size: 1.17em;
+    }
 }
 
 /* #endregion */
