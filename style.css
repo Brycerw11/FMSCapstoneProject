@@ -1,6 +1,7 @@
 html, body {
     margin: 0;
     padding: 0;
+    height: 100%;
 }
 
 body{
@@ -79,17 +80,15 @@ canvas {
     display: block;
 }
 
-html, body.center-content {
-    height: 100%;
-}
-
-body.center-content {
+/* #region - game selection page */
+.center-content {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
     padding: 30px;
     box-sizing: border-box;
+    height: 100%;
 }
 
 #game-picker-title {
@@ -107,6 +106,7 @@ body.center-content {
 }
 
 .exercise-container {
+    text-decoration: none;
     border: 2px solid white;
     border-radius: 30px;
     background-color: #45818e;
@@ -135,3 +135,4 @@ body.center-content {
     justify-content: center;
     margin: 0 auto;
 }
+/* #endregion */
