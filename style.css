@@ -55,3 +55,60 @@ header h1{
 canvas {
     display: block;
 }
+
+html, body.center-content {
+    height: 100%;
+}
+
+body.center-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+#game-picker-title {
+    color: #000000;
+}
+
+.exercise-title {
+    color: #ffffff;
+}
+
+#game-picker-title {
+    font-size: 60px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.exercise-container {
+    border: 2px solid white;
+    border-radius: 30px;
+    background-color: #45818e;
+    padding: 10px 20px 20px;
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+.exercise-title {
+    text-align: center;
+    font-size: 35px;
+    margin-bottom: 10px;
+}
+
+.exercise-image {
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
+}
+
+#exercises {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 40px;
+    max-width: 700px;
+    justify-content: center;
+    margin: 0 auto;
+}
