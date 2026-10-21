@@ -2,6 +2,8 @@
 $(document).ready(function(){
     // Start with the navbar hidden
     let navBarWidth = $("#nav-bar-contents").outerWidth();
+    let navBarVisible = false;
+
     $("#nav-bar-contents").css("left", "-" + numToPxStr(navBarWidth));
 
     // Wait 100ms then reupdate the position of the navbar
@@ -10,21 +12,36 @@ $(document).ready(function(){
         $("#nav-bar-contents").css("left", "-" + numToPxStr(navBarWidth));
     }, 100);
 
+    // Update navBarWidth when the window changes size
+    window.addEventListener("resize", () => {
+        navBarWidth = $("#nav-bar-contents").outerWidth();
+        if(!navBarVisible){
+            // Keep the navbar off screen
+            $("#nav-bar-contents").css("left", "-" + numToPxStr(navBarWidth));
+        }
+        else{
+            // Make sure that the navbar show/hide button moves with the navbar
+            $("#nav-bar-show-button").css("left", numToPxStr(navBarWidth - 40));
+        }
+    });
+
+    // Open / close the nav bar when the show/hide nav bar button is pressed
     $("#nav-bar-show-button").on("click", function(){
         navBarWidth = $("#nav-bar-contents").outerWidth();
-        console.log(navBarWidth);
 
-        if( $("#nav-bar-contents").css("left") != "0px" ){
+        if( !navBarVisible ){
             // Open the nav bar
             $("#nav-bar-contents").animate({left: numToPxStr(0)});
             $("#nav-bar-show-button").animate({left: numToPxStr(navBarWidth - 40)});
             $("#nav-bar-show-button").text("<");
+            navBarVisible = true;
         }
         else{
             // Close the nav bar
             $("#nav-bar-contents").animate({left: "-" + numToPxStr(navBarWidth)});
             $("#nav-bar-show-button").animate({left: numToPxStr(-40)});
             $("#nav-bar-show-button").text(">");
+            navBarVisible = false;
         }
     });
 });
