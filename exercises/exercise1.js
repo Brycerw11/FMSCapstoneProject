@@ -2,7 +2,10 @@
 	Exercise 1 Description: Follow movements and line up items.
 */
 
-let currentOutline = null;
+// the diameter within which the user can continue drawing if they accidentally lift their mouse (and the line will trail from last drawn point)
+const drawingToleranceR = 40;
+
+let currentOutlineTarget = null;
 
 function setup() {
 	const gameWidth = document.body.offsetWidth;
@@ -12,7 +15,7 @@ function setup() {
 
 	background(220);
 
-	currentOutline = {
+	currentOutlineTarget = {
 		type: "circle",
 		diameter: 100,
 		x: gameWidth/2,
@@ -22,11 +25,14 @@ function setup() {
 }
 
 function draw() {
-	// background(220);
+	background(220);
+
+	if (currentOutlineTarget) {
+		drawUserOutline();
+	}
 }
 
-let lastMouseX = 0;
-let lastMouseY = 0;
+let drawing = false;
 
 function mousePressed() {
 	handlePointerDown();
@@ -48,29 +54,64 @@ function touchEnded() {
 	handlePointerUp();
 }
 
+function getLastDrawnPoint() {
+	if (!currentOutlineTarget) return null;
+	const userPoints = currentOutlineTarget.userPoints;
+	if (userPoints.length >= 1)
+		return userPoints[userPoints.length-1];
+	else
+		return null;
+}
+
 function handlePointerDown() {
 	console.log("mouse pressed");
-	lastMouseX = null;
-	lastMouseY = null;
+	
+	// if (currentOutlineTarget) drawing = true;
+
+	const lastDrawingPoint = getLastDrawnPoint();
+	const userDidStartDrawing = !!lastDrawingPoint;
+	
+	if (
+		userDidStartDrawing &&
+		dist(
+			lastDrawingPoint.x,
+			lastDrawingPoint.y,
+			mouseX,
+			mouseY
+		) > drawingToleranceR
+	) {
+		drawing = false;
+	} else {
+		drawing = true;
+	}
 }
 
 function handlePointerDrag() {
-	console.table({lastMouseX,lastMouseY})
-	if (
-		currentOutline &&
-		lastMouseX !== null &&
-		lastMouseY !== null
-	) {
-		line(lastMouseX, lastMouseY, mouseX, mouseY);
-		currentOutline.userPoints.push(mouseX, mouseY);
+	if (drawing) {
+		// const lastDrawnPoint = getLastDrawnPoint();
+		// if (lastDrawnPoint) line(lastDrawnPoint.x, lastDrawnPoint.y, mouseX, mouseY);
+		currentOutlineTarget.userPoints.push({ x: mouseX, y: mouseY });
 	}
-
-	lastMouseX = mouseX;
-	lastMouseY = mouseY;
 }
 
 function handlePointerUp() {
 	console.log("mouse released");
-	lastMouseX = null;
-	lastMouseY = null;
+}
+
+function drawUserOutline() {
+	const userPoints = currentOutlineTarget.userPoints;
+	strokeWeight(4);
+	stroke(0);
+	for (let i = 1; i < userPoints.length; i++) {
+		const fromPoint = userPoints[i-1];
+		const toPoint = userPoints[i];
+		line(fromPoint.x, fromPoint.y, toPoint.x, toPoint.y);
+	}
+
+	const lastDrawnPoint = getLastDrawnPoint();
+	if (lastDrawnPoint) {
+		noStroke();
+		fill(0, 255, 0, 128);
+		circle(lastDrawnPoint.x, lastDrawnPoint.y, drawingToleranceR*0.8);
+	}
 }
