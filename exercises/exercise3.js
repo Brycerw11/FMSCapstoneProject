@@ -3,7 +3,10 @@
 */	
 
 function setup() {
-	createCanvas(400, 400);
+	const gameWidth = document.body.offsetWidth;
+	const gameHeight = document.body.offsetHeight;
+
+	createCanvas(gameWidth, gameHeight);
 }
 
 function draw() {
