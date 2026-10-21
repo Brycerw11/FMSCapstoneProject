@@ -75,6 +75,49 @@ header h1, header h2{
 
 /* #endregion */
 
+/* #region Side Navbar CSS */
+#nav-bar-container{
+    position: fixed;
+}
+
+#nav-bar-show-button{
+    display: flex;
+    align-content: center;
+    justify-content: end;
+
+    position: fixed;
+    top: 0.5rem;
+    left: -40px;
+
+    width: fit-content;
+
+    padding-left: 3rem;
+    padding-right: 1rem;
+    
+    border: 3px dashed white;
+    border-radius: 16px;
+
+    text-align: center;
+    user-select: none;
+    background-color: #76A5AF;
+}
+
+#nav-bar-contents{
+    position: absolute;
+    
+    display: flex;
+    flex-direction: column;
+
+    min-width: 10vw;
+    left: -50vw;
+
+    height: 100vh;
+    z-index: 5 !important;
+    background-color: #76A5AF;
+}
+
+/* #endregion */
+
 /* p5.js CSS for canvases */
 canvas {
     display: block;
