@@ -17,7 +17,7 @@ function setup() {
 
 	currentOutlineTarget = {
 		type: "circle",
-		diameter: 100,
+		diameter: 250,
 		x: gameWidth/2,
 		y: gameHeight/2,
 		userPoints: []
@@ -28,6 +28,7 @@ function draw() {
 	background(220);
 
 	if (currentOutlineTarget) {
+		drawTargetShape();
 		drawUserOutline();
 	}
 }
@@ -98,6 +99,21 @@ function handlePointerUp() {
 	console.log("mouse released");
 }
 
+function drawTargetShape() {
+	// TODO: make this a dotted stroke
+	stroke(0);
+	strokeWeight(1);
+	noFill();
+
+	if (currentOutlineTarget.type === "circle") {
+		circle(
+			currentOutlineTarget.x,
+			currentOutlineTarget.y,
+			currentOutlineTarget.diameter
+		);
+	}
+}
+
 function drawUserOutline() {
 	const userPoints = currentOutlineTarget.userPoints;
 	strokeWeight(4);
@@ -106,6 +122,7 @@ function drawUserOutline() {
 		const fromPoint = userPoints[i-1];
 		const toPoint = userPoints[i];
 		line(fromPoint.x, fromPoint.y, toPoint.x, toPoint.y);
+		// TODO: green glowing trail
 	}
 
 	const lastDrawnPoint = getLastDrawnPoint();
