@@ -1,5 +1,10 @@
 // Wait until jQuery is ready
 $(document).ready(function(){
+    // Set the height of the nav bar show / hide button
+    if(document.getElementsByTagName("header").length != 0){
+        $("#nav-bar-show-button").css("top", (document.getElementsByTagName("header")[0].clientHeight + 16) + "px");
+    }
+
     // Start with the navbar hidden
     let navBarWidth = $("#nav-bar-contents").outerWidth();
     let navBarVisible = false;
