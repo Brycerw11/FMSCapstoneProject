@@ -1,38 +1,65 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-		<title>Settings - FMS Capstone Project</title>
+	<title>Settings - FMS Capstone Project</title>
 
-		<link rel="stylesheet" type="text/css" href="style.css" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
 
-		<!-- Import Kanit Font -->
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+	<!-- Import Kanit Font -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
-		<script src="libraries/p5.min.js"></script>
-		<script src="libraries/p5.sound.min.js"></script>
-	</head>
+	<!-- Link jQuery 4.0 -->
+    <script
+        src="https://code.jquery.com/jquery-4.0.0.min.js"
+        integrity="sha256-OaVG6prZf4v69dPg6PhVattBXkcOWQB62pdZ3ORyrao="
+        crossorigin="anonymous">
+	</script>
 
-	<body>
-		<!-- Site Header -->
-		<header>
-			<div id="logo-container">
-				<img id="logo-image" src="https://www.svgrepo.com/show/508699/landscape-placeholder.svg" alt="{Site Name} Logo" id="logo">
-			</div>
-			<div id="site-title-container">
-				<h1 id="site-title" class="kanit">Website Name</h1>
-				<h2 id="page-title" class="kanit">Settings</h2>
-			</div>
-			<div></div> <!-- Empty div used for aligning logo and header title -->
-		</header>
+	<script src="libraries/p5.min.js"></script>
+	<script src="libraries/p5.sound.min.js"></script>
+</head>
 
-		<!-- Page Content -->
+<body>
+	<!-- Site Header -->
+	<header>
+		<div id="logo-container">
+			<img id="logo-image" src="https://www.svgrepo.com/show/508699/landscape-placeholder.svg" alt="{Site Name} Logo" id="logo">
+		</div>
+		<div id="site-title-container">
+			<h1 id="site-title" class="kanit">Website Name</h1>
+			<h2 id="page-title" class="kanit">Settings</h2>
+		</div>
+		<div></div> <!-- Empty div used for aligning logo and header title -->
+	</header>
+
+	<!-- Nav Bar -->
+    <nav id="nav-bar-container" class="kanit">
+        <div id="nav-bar-contents">
+            <div id="nav-bar-header">
+                <div id="logo-container">
+				    <img id="logo-image" src="https://www.svgrepo.com/show/508699/landscape-placeholder.svg" alt="{Site Name} Logo" id="logo">
+			    </div>
+
+				<h1 id="site-title" class="nav-bar-title kanit">Website Name</h1>
+				<h2 id="page-title" class="nav-bar-title kanit">Settings</h2>
+            </div>
+            <a class="nav-bar-button kanit" href="index.html">Home</a>
+            <a class="nav-bar-button kanit" href="./exerciseSelection.html">Games</a>
+            <a class="nav-bar-button kanit" href="./metrics.html">Metrics</a>
+            <a class="nav-bar-button kanit curr-page" href="">Settings</a>
+        </div>
+        <div id="nav-bar-show-button"> > </div>
+    </nav>
+	<script src="./navBar.js"></script>
+
+	<!-- Page Content -->
 		
 		
 
-	</body>
+</body>
 </html>
