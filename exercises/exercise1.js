@@ -20,12 +20,26 @@ function setup() {
 		diameter: 250,
 		x: gameWidth/2,
 		y: gameHeight/2,
-		userPoints: []
+		userPoints: [],
+		almostClosedAt: null,
+		closedAt: null,
+		offsetX: 0,
+		offsetY: 0,
+		dragInfo: {
+			startX: null,
+			startY: null,
+			offsetX: 0,
+			offsetY: 0
+		}
 	};
 }
 
 function draw() {
 	background(220);
+
+	// text(String(currentOutlineTarget.dragInfo.startX), 50, 100);
+	// text(String(currentOutlineTarget.dragInfo.startY), 50, 150);
+	// text(String(overallOffsetX), 50, 200);
 
 	if (currentOutlineTarget) {
 		const targetShapeAlpha = (
@@ -72,7 +86,23 @@ function getLastDrawnPoint() {
 function handlePointerDown() {
 	console.log("mouse pressed");
 
-	if (!currentOutlineTarget.closedAt) {
+	if (currentOutlineTarget.closedAt) {
+		const collisionPolyVectors = [
+			...currentOutlineTarget.userPoints.map(point =>
+				createVector(
+					point.x+currentOutlineTarget.offsetX,
+					point.y+currentOutlineTarget.offsetY
+				)
+			)
+		];
+
+		if (collidePointPoly(mouseX, mouseY, collisionPolyVectors)) {
+			console.log("set, closed");
+			currentOutlineTarget.dragInfo.startX = mouseX;
+			currentOutlineTarget.dragInfo.startY = mouseY;
+		}
+		// console.log(currentOutlineTarget);
+	} else {
 		// if (currentOutlineTarget) drawing = true;
 
 		const lastDrawingPoint = getLastDrawnPoint();
@@ -95,7 +125,14 @@ function handlePointerDown() {
 }
 
 function handlePointerDrag() {
-	if (drawing && !currentOutlineTarget.closedAt) {
+	if (
+		currentOutlineTarget.closedAt &&
+		currentOutlineTarget.dragInfo.startX !== null &&
+		currentOutlineTarget.dragInfo.startY !== null
+	) {
+		currentOutlineTarget.dragInfo.offsetX = mouseX - currentOutlineTarget.dragInfo.startX;
+		currentOutlineTarget.dragInfo.offsetY = mouseY - currentOutlineTarget.dragInfo.startY;
+	} else if (!currentOutlineTarget.closedAt && drawing) {
 		// const lastDrawnPoint = getLastDrawnPoint();
 		// if (lastDrawnPoint) line(lastDrawnPoint.x, lastDrawnPoint.y, mouseX, mouseY);
 		currentOutlineTarget.userPoints.push({ x: mouseX, y: mouseY });
@@ -124,8 +161,18 @@ function handlePointerDrag() {
 function handlePointerUp() {
 	console.log("mouse released");
 
-	if (!currentOutlineTarget.closedAt) {
-		console.log(currentOutlineTarget.almostClosedAt)
+	if (
+		currentOutlineTarget.dragInfo.startX !== null ||
+		currentOutlineTarget.dragInfo.startY !== null
+	) {
+		currentOutlineTarget.offsetX += currentOutlineTarget.dragInfo.offsetX;
+		currentOutlineTarget.offsetY += currentOutlineTarget.dragInfo.offsetY;
+		currentOutlineTarget.dragInfo.startX = null;
+		currentOutlineTarget.dragInfo.startY = null;
+		currentOutlineTarget.dragInfo.offsetX = null;
+		currentOutlineTarget.dragInfo.offsetY = null;
+	} else if (!currentOutlineTarget.closedAt) {
+		// console.log(currentOutlineTarget.almostClosedAt)
 
 		if (currentOutlineTarget.almostClosedAt) {
 			currentOutlineTarget.closedAt = Date.now();
@@ -134,7 +181,7 @@ function handlePointerUp() {
 }
 
 function drawTargetShape(alpha) {
-	console.log(alpha);
+	// console.log(alpha);
 	stroke(0, 0, 0, alpha*255);
 	strokeWeight(1);
 	drawingContext.setLineDash([10, 15]);
@@ -155,23 +202,36 @@ function drawUserOutline() {
 	const userPoints = currentOutlineTarget.userPoints;
 	strokeWeight(4);
 	stroke(0);
-	console.log("draw outline");
-	console.log(currentOutlineTarget.closedAt);
+	// console.log("draw outline");
+	// console.log(currentOutlineTarget.closedAt);
 	if (currentOutlineTarget.almostClosedAt) {
 		fill(0, 255, 0, Math.min(30, (Date.now()-currentOutlineTarget.almostClosedAt)/3));
 	}
 	if (currentOutlineTarget.closedAt) {
-		console.log("other")
+		// console.log("other")
 		fill(0, 255, 0, 30+Math.min(60, (Date.now()-currentOutlineTarget.closedAt)/3));
 	}
 	beginShape();
+
+	const overallOffsetX = currentOutlineTarget.offsetX+currentOutlineTarget.dragInfo.offsetX;
+	const overallOffsetY = currentOutlineTarget.offsetY+currentOutlineTarget.dragInfo.offsetY;
+
+	textSize(50);
+	// text(String(currentOutlineTarget.offsetX), 50, 100);
+	// text(String(currentOutlineTarget.dragInfo.offsetWidth), 50, 150);
+	// text(String(overallOffsetX), 50, 200);
+
+	// console.log(currentOutlineTarget.offsetX);
+	// console.log(currentOutlineTarget.dragInfo.offsetX)
+	// console.log(overallOffsetX)
+
 	for (let i = 0; i < userPoints.length; i++) {
 		// const fromPoint = userPoints[i-1];
 		// const toPoint = userPoints[i];
 		const point = userPoints[i];
 		// line(fromPoint.x, fromPoint.y, toPoint.x, toPoint.y);
 		// TODO: green glowing trail
-		vertex(point.x, point.y);
+		vertex(point.x+overallOffsetX, point.y+overallOffsetY);
 		// vertex(300, 400);
 		// vertex(200, 400);
 	}
