@@ -17,10 +17,42 @@ window.addEventListener("resize", function(){
 	gameCanvasHTML.style.height = gameHeight + "px";
 })
 
+// #region Pointer tracking functions
+// Create a collection of pointers that show where the user is pressing the touch screen
+const pointerMap = new Map();
+
+window.addEventListener("pointerdown", (evt) =>{
+	if (evt.pointerType != "mouse"){
+		let pointerObj = {
+			x: evt.x,
+			y: evt.y,
+		};
+
+		pointerMap.set(evt.pointerId, pointerObj);
+	}
+});
+window.addEventListener("pointermove", (evt) =>{
+	if (evt.pointerType != "mouse"){
+		pointerMap.get(evt.pointerId).x = evt.x;
+		pointerMap.get(evt.pointerId).y = evt.y;
+		
+		console.log(`x: ${pointerMap.get(evt.pointerId).x}, y: ${pointerMap.get(evt.pointerId).y}`);
+	}
+});
+window.addEventListener("pointerup", (evt) =>{
+	if (evt.pointerType != "mouse"){
+		pointerMap.delete(evt.pointerId);
+	}
+});
+// #endregion
+
 function setup() {
 	createCanvas(gameWidth, gameHeight);
 
 	gameCanvasHTML = document.getElementById("defaultCanvas0");
+
+	// This is required for the site to handle more than 3 touches at the same time
+	gameCanvasHTML.style.touchAction = "none";
 
 	generateShapeList(3, 150);
 }
@@ -29,6 +61,8 @@ function setup() {
 
 
 // #region Game Loop
+
+// One time functions
 let shapeList = [];
 
 function generateShapeList(numShapes, sizeInPx){
@@ -45,12 +79,7 @@ function generateShapeList(numShapes, sizeInPx){
 
 		// Loop through each shape to check for intersections
 		for(let shape of shapeList){
-			// Check for intersection with the shape by finding the distance between their centers squared
-			// and checking to see whether is is less than the sum of the radii squared
-			let distanceSquared = ((xPos - shape.x) * (xPos - shape.x)) + ((yPos - shape.y) * (yPos - shape.y));
-			let radiiSum = (shape.size + sizeInPx) / 2;
-
-			if(distanceSquared <= radiiSum * radiiSum){
+			if(circleOverlapTest(xPos, yPos, shape.x, shape.y, sizeInPx / 2, shape.size / 2)){
 				return true;
 			}
 		}
@@ -99,15 +128,24 @@ function generateShapeList(numShapes, sizeInPx){
 			y: yPos,
 			size: sizeInPx,
 			rotation: shapeRotation,
+			touching: false,
 		});
 	}
 }
 
+// Functions called every draw cycle
 function drawShapeList(){
 	// draw each shape
 	for(const shape of shapeList){
 		// Each shape class has its own drawing method
-		fill("#FFFFFF");
+		
+		// Draw shapes
+		if(shape.touching){
+			fill("#CFE2F3");
+		}
+		else{
+			fill("#FFFFFF");
+		}
 		stroke("#000000");
 		strokeWeight(3);
 
@@ -119,17 +157,88 @@ function drawShapeList(){
 				console.log("Unknown shape class; cannot draw shape");
 				break;
 		}
+
+		// Draw shape progress
+		if(totalProgress == 0){continue;}
+
+		fill("#6AA84F");
+		stroke("#000000");
+		strokeWeight(0);
+
+		switch(shape.class){
+			case "circle":
+				circle(shape.x, shape.y, (totalProgress / 100) * shape.size);
+				break;
+			default:
+				console.log("Unknown shape class; cannot draw shape");
+				break;
+		}
 	}
 }
 
+const totalHoldTimeMS = 3000;
+let totalProgress = 0;
+function updateShapeProgress(){
+	let touchingAllShapes = true;
+
+	for(const shape of shapeList){
+		shape.touching = false;
+
+		for([pID, pObj] of pointerMap){
+			if(circleOverlapTest(shape.x, shape.y, pObj.x, pObj.y, shape.size, 1)){
+				shape.touching = true;
+				break;
+			}
+		}
+
+		if(shape.touching == false){
+			touchingAllShapes = false;
+		}
+	}
+
+	if(touchingAllShapes){
+		let newProgress = totalProgress;
+		newProgress += 100 * (deltams / totalHoldTimeMS);
+
+		if(newProgress >= 100){newProgress = 100;}
+
+		totalProgress = newProgress
+	}
+	else{
+		totalProgress = 0;
+	}	
+}
+
+var lastFrame;
+var thisFrame;
+var deltams = 0;
+
 function draw() {
+	// Get delta time
+	lastFrame = thisFrame;
+	thisFrame = new Date();
+
+	deltams = thisFrame - lastFrame;
+	
 	background(220);
+	updateShapeProgress();
+
 	drawShapeList();
 }
 // #endregion
 
 
 // #region Helper functions
+function circleOverlapTest(x1, y1, x2, y2, r1, r2){
+	// false means there is no intersection
+	// true means there is an intersection
+
+	let distanceSquared = ((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1));
+	let radiiSumSquared = (r1 + r2) * (r1 + r2);
+
+	return (distanceSquared <= radiiSumSquared);
+}
+
 function percentToPx(percentNum){
 
 }
