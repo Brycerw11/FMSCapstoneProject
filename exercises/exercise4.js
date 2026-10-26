@@ -182,6 +182,7 @@ function drawShapeList(){
 // Function to update the round's progress
 const totalHoldTimeMS = 3000;
 let totalProgress = 0;
+
 function updateShapeProgress(){
 	let touchingAllShapes = true;
 
@@ -189,7 +190,7 @@ function updateShapeProgress(){
 		shape.touching = false;
 
 		for([pID, pObj] of pointerMap){
-			if(circleOverlapTest(shape.x, shape.y, pObj.x, pObj.y, shape.size, 1)){
+			if(circleOverlapTest(shape.x, shape.y, pObj.x, pObj.y, shape.size / 2, 1)){
 				shape.touching = true;
 				break;
 			}
