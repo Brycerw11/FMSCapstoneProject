@@ -28,7 +28,12 @@ function draw() {
 	background(220);
 
 	if (currentOutlineTarget) {
-		drawTargetShape();
+		const targetShapeAlpha = (
+			currentOutlineTarget.closedAt ?
+			Math.max(1-((Date.now()-currentOutlineTarget.closedAt)/50)) :
+			1
+		);
+		if (targetShapeAlpha > 0) drawTargetShape(targetShapeAlpha);
 		drawUserOutline();
 	}
 }
@@ -66,43 +71,73 @@ function getLastDrawnPoint() {
 
 function handlePointerDown() {
 	console.log("mouse pressed");
-	
-	// if (currentOutlineTarget) drawing = true;
 
-	const lastDrawingPoint = getLastDrawnPoint();
-	const userDidStartDrawing = !!lastDrawingPoint;
-	
-	if (
-		userDidStartDrawing &&
-		dist(
-			lastDrawingPoint.x,
-			lastDrawingPoint.y,
-			mouseX,
-			mouseY
-		) > drawingToleranceR
-	) {
-		drawing = false;
-	} else {
-		drawing = true;
+	if (!currentOutlineTarget.closedAt) {
+		// if (currentOutlineTarget) drawing = true;
+
+		const lastDrawingPoint = getLastDrawnPoint();
+		const userDidStartDrawing = !!lastDrawingPoint;
+		
+		if (
+			userDidStartDrawing &&
+			dist(
+				lastDrawingPoint.x,
+				lastDrawingPoint.y,
+				mouseX,
+				mouseY
+			) > drawingToleranceR
+		) {
+			drawing = false;
+		} else {
+			drawing = true;
+		}
 	}
 }
 
 function handlePointerDrag() {
-	if (drawing) {
+	if (drawing && !currentOutlineTarget.closedAt) {
 		// const lastDrawnPoint = getLastDrawnPoint();
 		// if (lastDrawnPoint) line(lastDrawnPoint.x, lastDrawnPoint.y, mouseX, mouseY);
 		currentOutlineTarget.userPoints.push({ x: mouseX, y: mouseY });
+	
+		const firstPoint = currentOutlineTarget.userPoints[0];
+		
+		const distance = dist(
+			firstPoint.x,
+			firstPoint.y,
+			mouseX,
+			mouseY
+		);
+
+		if (
+			distance <= drawingToleranceR*0.8 &&
+			!currentOutlineTarget.almostClosedAt
+			// currentOutlineTarget.userPoints.length > 50
+		) {
+			currentOutlineTarget.almostClosedAt = Date.now();
+		} else if (distance > (drawingToleranceR)) {
+			currentOutlineTarget.almostClosedAt = null;
+		}
 	}
 }
 
 function handlePointerUp() {
 	console.log("mouse released");
+
+	if (!currentOutlineTarget.closedAt) {
+		console.log(currentOutlineTarget.almostClosedAt)
+
+		if (currentOutlineTarget.almostClosedAt) {
+			currentOutlineTarget.closedAt = Date.now();
+		}
+	}
 }
 
-function drawTargetShape() {
-	// TODO: make this a dotted stroke
-	stroke(0);
+function drawTargetShape(alpha) {
+	console.log(alpha);
+	stroke(0, 0, 0, alpha*255);
 	strokeWeight(1);
+	drawingContext.setLineDash([10, 15]);
 	noFill();
 
 	if (currentOutlineTarget.type === "circle") {
@@ -112,23 +147,43 @@ function drawTargetShape() {
 			currentOutlineTarget.diameter
 		);
 	}
+
+	drawingContext.setLineDash([]);
 }
 
 function drawUserOutline() {
 	const userPoints = currentOutlineTarget.userPoints;
 	strokeWeight(4);
 	stroke(0);
-	for (let i = 1; i < userPoints.length; i++) {
-		const fromPoint = userPoints[i-1];
-		const toPoint = userPoints[i];
-		line(fromPoint.x, fromPoint.y, toPoint.x, toPoint.y);
-		// TODO: green glowing trail
+	console.log("draw outline");
+	console.log(currentOutlineTarget.closedAt);
+	if (currentOutlineTarget.almostClosedAt) {
+		fill(0, 255, 0, Math.min(30, (Date.now()-currentOutlineTarget.almostClosedAt)/3));
 	}
+	if (currentOutlineTarget.closedAt) {
+		console.log("other")
+		fill(0, 255, 0, 30+Math.min(60, (Date.now()-currentOutlineTarget.closedAt)/3));
+	}
+	beginShape();
+	for (let i = 0; i < userPoints.length; i++) {
+		// const fromPoint = userPoints[i-1];
+		// const toPoint = userPoints[i];
+		const point = userPoints[i];
+		// line(fromPoint.x, fromPoint.y, toPoint.x, toPoint.y);
+		// TODO: green glowing trail
+		vertex(point.x, point.y);
+		// vertex(300, 400);
+		// vertex(200, 400);
+	}
+	// endShape(CLOSE);
+	endShape();
 
-	const lastDrawnPoint = getLastDrawnPoint();
-	if (lastDrawnPoint) {
-		noStroke();
-		fill(0, 255, 0, 128);
-		circle(lastDrawnPoint.x, lastDrawnPoint.y, drawingToleranceR*0.8);
+	if (!currentOutlineTarget.closedAt) {
+		const lastDrawnPoint = getLastDrawnPoint();
+		if (lastDrawnPoint) {
+			noStroke();
+			fill(0, 255, 0, 128);
+			circle(lastDrawnPoint.x, lastDrawnPoint.y, drawingToleranceR*0.8);
+		}
 	}
 }
