@@ -3,7 +3,8 @@
 		A game where the user tries to press and hold on as many shapes as possible
 */
 
-// #region game canvas setup
+// #region game setup
+// Game canvas setup
 let gameWidth = window.innerWidth;
 let gameHeight = window.innerHeight;
 
@@ -17,6 +18,7 @@ window.addEventListener("resize", function(){
 	gameCanvasHTML.style.height = gameHeight + "px";
 })
 
+// Pointer tracking setup
 // #region Pointer tracking functions
 // Create a collection of pointers that show where the user is pressing the touch screen
 const pointerMap = new Map();
@@ -46,6 +48,7 @@ window.addEventListener("pointerup", (evt) =>{
 });
 // #endregion
 
+// p5.js Setup
 function setup() {
 	createCanvas(gameWidth, gameHeight);
 
@@ -56,15 +59,14 @@ function setup() {
 
 	generateShapeList(3, 150);
 }
-
 // #endregion
 
 
 // #region Game Loop
-
 // One time functions
 let shapeList = [];
 
+// Function to create a new shape list
 function generateShapeList(numShapes, sizeInPx){
 	// Reset shape list
 	shapeList = [];
@@ -134,6 +136,7 @@ function generateShapeList(numShapes, sizeInPx){
 }
 
 // Functions called every draw cycle
+// Function to draw the shapes in the shapeList to the screen
 function drawShapeList(){
 	// draw each shape
 	for(const shape of shapeList){
@@ -176,6 +179,7 @@ function drawShapeList(){
 	}
 }
 
+// Function to update the round's progress
 const totalHoldTimeMS = 3000;
 let totalProgress = 0;
 function updateShapeProgress(){
@@ -209,20 +213,25 @@ function updateShapeProgress(){
 	}	
 }
 
+// Varaibles for calculating delta time in ms
 var lastFrame;
 var thisFrame;
 var deltams = 0;
 
 function draw() {
-	// Get delta time
+	// Update delta time
 	lastFrame = thisFrame;
 	thisFrame = new Date();
 
 	deltams = thisFrame - lastFrame;
 	
+	// Clear the screen
 	background(220);
+
+	// Calculate shape progress
 	updateShapeProgress();
 
+	// Draw shapes to the screen
 	drawShapeList();
 }
 // #endregion
