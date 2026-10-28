@@ -34,6 +34,14 @@ function setup() {
 	};
 }
 
+let points;
+
+const pointCount = 30;
+
+setTimeout(() => {
+	points = shapeToVector(pointCount);
+}, 100);
+
 function draw() {
 	background(220);
 
@@ -50,6 +58,10 @@ function draw() {
 		if (targetShapeAlpha > 0) drawTargetShape(targetShapeAlpha);
 		drawUserOutline();
 	}
+
+	drawPoints(points, "orange");
+	if (currentOutlineTarget.userPointsResampled)
+		drawPoints(currentOutlineTarget.userPointsResampled, "purple");
 }
 
 let drawing = false;
@@ -176,6 +188,10 @@ function handlePointerUp() {
 
 		if (currentOutlineTarget.almostClosedAt) {
 			currentOutlineTarget.closedAt = Date.now();
+			currentOutlineTarget.userPointsResampled = resamplePoints(
+				currentOutlineTarget.userPoints,
+				pointCount
+			);
 		}
 	}
 }
@@ -247,3 +263,86 @@ function drawUserOutline() {
 		}
 	}
 }
+
+/* #region Accuracy Math */
+
+function shapeToVector(numPoints) {
+	const points = [];
+
+	const { x, y } = currentOutlineTarget;
+	
+	if (currentOutlineTarget.type === "circle") {
+		const radius = currentOutlineTarget.diameter/2;
+		const incrementBy = TWO_PI / numPoints;
+		for (let radians = 0; radians < TWO_PI; radians += incrementBy) {
+			points.push({
+				x: x + radius * Math.cos(radians),
+				y: y + radius * Math.sin(radians)
+			});
+		}
+	}
+
+	console.log(points);
+
+	return points;
+}
+
+function resamplePoints(ogPoints, numPoints) {
+	if (ogPoints.length >= 2) {
+		const newPoints = [];
+
+		let totalDistance = 0;
+
+		for (let i = 1; i < ogPoints.length; i++) {
+			const pointA = ogPoints[i-1];
+			const pointB = ogPoints[i];
+			const distanceBetween = dist(
+				pointA.x,
+				pointA.y,
+				pointB.x,
+				pointB.y
+			);
+			pointB.distanceFromLast = distanceBetween;
+			totalDistance += distanceBetween;
+		}
+
+		console.log(totalDistance);
+
+		const targetSteps = totalDistance / numPoints;
+
+		newPoints.push({
+			x: ogPoints[0].x,
+			y: ogPoints[0].y
+		});
+
+		let elapsedDistance = 0;
+		for (let i = 1; i < ogPoints.length; i++) {
+			elapsedDistance += ogPoints[i].distanceFromLast;
+			console.log("distance: " + elapsedDistance);
+			console.log("target: " + newPoints.length*targetSteps);
+			if (elapsedDistance >= newPoints.length*targetSteps) {
+				// elapsedDistance = 0;
+				newPoints.push({
+					x: ogPoints[i].x,
+					y: ogPoints[i].y
+				});
+				if (newPoints.length >= numPoints) break;
+			}
+		}
+
+		return newPoints;
+	} else {
+		throw new Error("error. points should never be less than 2.");
+	}
+}
+
+function drawPoints(points, fillColor) {
+	if (!points) return;
+	noStroke();
+	fill(fillColor);
+	for (const point of points) {
+		circle(point.x, point.y, 10);
+	}
+}
+
+/* #endregion */
