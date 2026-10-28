@@ -13,8 +13,9 @@
 	// Vars for the game's core functionality
 	let inGame = false;
 	let inRound = false;
+	let timeRemaining = 0; //time remaining in the round in ms
 	let roundNum = 0;
-	
+
 	let shapeList = [];
 	const totalHoldTimeMS = 3000;
 	let totalProgress = 0;
@@ -62,6 +63,19 @@ window.addEventListener("resize", function(){
 	});
 // #endregion
 
+// Start new game function
+function startGame(){
+	roundNum = 1;
+	inRound = true;
+	timeRemaining = 60000;
+	generateShapeList(3, 150);
+	
+	$("#instructions-panel").hide();
+	updateRoundInfoPane();
+	$("#round-info-pane").show();
+	inGame = true;
+}
+
 // p5.js Setup
 function setup() {
 	createCanvas(gameWidth, gameHeight);
@@ -71,13 +85,18 @@ function setup() {
 	// This is required for the site to handle more than 3 touches at the same time
 	gameCanvasHTML.style.touchAction = "none";
 
-	generateShapeList(3, 150);
+	// Show instructions panel
+	$(document).ready(() => {
+		$("#instructions-panel").show();
+		$("#round-info-pane").hide();
+		$("round-complete-panel").hide();
+	});
 }
 // #endregion
 
 
 // #region Game Loop
-// One time functions
+
 // Function to create a new shape list
 function generateShapeList(numShapes, sizeInPx){
 	// Reset shape list
@@ -145,7 +164,6 @@ function generateShapeList(numShapes, sizeInPx){
 	}
 }
 
-// Functions called every draw cycle
 // Function to draw the shapes in the shapeList to the screen
 function drawShapeList(){
 	// draw each shape
@@ -217,23 +235,85 @@ function updateShapeProgress(){
 	}	
 }
 
-// Varaibles for calculating delta time in ms
-function draw() {
-	// Update delta time
-	lastFrame = thisFrame;
-	thisFrame = new Date();
-
-	deltams = thisFrame - lastFrame;
-	
-	// Clear the screen
-	background(220);
-
-	// Calculate shape progress
-	updateShapeProgress();
-
-	// Draw shapes to the screen
-	drawShapeList();
+// Update the round info pane
+function updateRoundInfoPane(){
+	$("#round-label").text(`Round: ${roundNum}`);
+	$("#time-label").text(Math.round(timeRemaining / 1000.0));
 }
+
+function showRoundCompletePanel(){
+	// Update panel contents
+	if(timeRemaining == 0){
+		// The user lost the round
+		$("#round-complete-text").text(`Good job, you made it through ${roundNum} rounds!!`)
+	}
+	else{
+		// The user won the round and show go to the next one
+		timeLeft = new Decimal(timeRemaining / 1000);
+		$("#round-complete-text").text(`You made it through round #${roundNum}!!! It took you ${timeLeft.toFixed(1)} seconds!`)
+	}
+
+	$("#round-complete-panel").show();
+}
+
+// TODO
+function nextRound(){
+
+}
+
+// #region Primary Draw Function
+	function draw() {
+		// Update delta time
+		lastFrame = thisFrame;
+		thisFrame = new Date();
+
+		deltams = thisFrame - lastFrame;
+		
+		// Clear the screen
+		background(220);
+
+		// If not in a game, make sure the correct panels are show and don't process the game
+		if(!inGame){
+			$("#instructions-panel").show();
+			$("#round-info-pane").hide();
+			$("#round-complete-panel").hide();
+			return;
+		}
+		
+		// Calculate shape progress
+		if(inRound){
+			updateShapeProgress();
+			
+			if(totalProgress >= 100){
+				// The user has won this round
+				inRound = false;
+				showRoundCompletePanel();
+				return;
+			}
+			
+			// Update timer
+			if(timeRemaining <= 0){
+				// The loser has lost
+				timeRemaining = 0;
+				inRound = false;
+				showRoundCompletePanel();
+				return;
+			}
+			else{
+				timeRemaining -= deltams;
+			}
+
+			updateRoundInfoPane();
+		}
+		else{
+
+		}
+
+		// Draw shapes to the screen
+		drawShapeList();
+	}
+// #endregion
+
 // #endregion
 
 
