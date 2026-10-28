@@ -1,6 +1,7 @@
 /* 
 	Exercise 4 Description: 
-		A game where the user tries to press and hold on as many shapes as possible
+		A game where the user tries to press and hold on as many shapes as possible.
+		The game gets hard by adding more shapes and adding moving shapes as the rounds continue.
 */
 
 // #region game setup
@@ -18,34 +19,31 @@ window.addEventListener("resize", function(){
 	gameCanvasHTML.style.height = gameHeight + "px";
 })
 
-// Pointer tracking setup
-// #region Pointer tracking functions
-// Create a collection of pointers that show where the user is pressing the touch screen
-const pointerMap = new Map();
+// #region Pointer tracking setup and functions
+	// Create a collection of pointers that show where the user is pressing the touch screen
+	const pointerMap = new Map();
 
-window.addEventListener("pointerdown", (evt) =>{
-	if (evt.pointerType != "mouse"){
-		let pointerObj = {
-			x: evt.x,
-			y: evt.y,
-		};
+	window.addEventListener("pointerdown", (evt) =>{
+		if (evt.pointerType != "mouse"){
+			let pointerObj = {
+				x: evt.x,
+				y: evt.y,
+			};
 
-		pointerMap.set(evt.pointerId, pointerObj);
-	}
-});
-window.addEventListener("pointermove", (evt) =>{
-	if (evt.pointerType != "mouse"){
-		pointerMap.get(evt.pointerId).x = evt.x;
-		pointerMap.get(evt.pointerId).y = evt.y;
-		
-		console.log(`x: ${pointerMap.get(evt.pointerId).x}, y: ${pointerMap.get(evt.pointerId).y}`);
-	}
-});
-window.addEventListener("pointerup", (evt) =>{
-	if (evt.pointerType != "mouse"){
-		pointerMap.delete(evt.pointerId);
-	}
-});
+			pointerMap.set(evt.pointerId, pointerObj);
+		}
+	});
+	window.addEventListener("pointermove", (evt) =>{
+		if (evt.pointerType != "mouse"){
+			pointerMap.get(evt.pointerId).x = evt.x;
+			pointerMap.get(evt.pointerId).y = evt.y;
+		}
+	});
+	window.addEventListener("pointerup", (evt) =>{
+		if (evt.pointerType != "mouse"){
+			pointerMap.delete(evt.pointerId);
+		}
+	});
 // #endregion
 
 // p5.js Setup
@@ -89,7 +87,7 @@ function generateShapeList(numShapes, sizeInPx){
 		return false;
 	}
 
-
+	// Loop to create numShapes shapes
 	for(let i = 0; i < numShapes; i++){
 		// Determine properties for this shape
 		let shapeClass = "circle";
@@ -110,11 +108,9 @@ function generateShapeList(numShapes, sizeInPx){
 			// If we cannot find a shape that doesn't intersect, make the shapes smaller and try again
 			if(iterations > 20){
 				// If the shapes would be too smaller after making smaller just don't add any more shapes
-				if(sizeInPx - 50 < 25){
-					return;
+				if(!(sizeInPx - 50 < 25)){
+					generateShapeList(numShapes, sizeInPx - 50);
 				}
-				
-				generateShapeList(numShapes, sizeInPx - 50);
 				return;
 			}
 		}
@@ -239,6 +235,7 @@ function draw() {
 
 
 // #region Helper functions
+
 function circleOverlapTest(x1, y1, x2, y2, r1, r2){
 	// false means there is no intersection
 	// true means there is an intersection
