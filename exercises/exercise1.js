@@ -2,6 +2,8 @@
 	Exercise 1 Description: Follow movements and line up items.
 */
 
+let debugMode = true;
+
 // the diameter within which the user can continue drawing if they accidentally lift their mouse (and the line will trail from last drawn point)
 const drawingToleranceR = 40;
 
@@ -20,7 +22,9 @@ function setup() {
 		diameter: 250,
 		x: gameWidth/2,
 		y: gameHeight/2,
+		accuracy: null,
 		userPoints: [],
+		userPointsResampled: [],
 		almostClosedAt: null,
 		closedAt: null,
 		offsetX: 0,
@@ -34,13 +38,17 @@ function setup() {
 	};
 }
 
-let points;
+let targetPoints;
 
-const pointCount = 30;
+const pointCount = 20;
 
-setTimeout(() => {
-	points = shapeToVector(pointCount);
-}, 100);
+// TODO: fix bug where you can draw essentially nothing
+
+if (debugMode) {
+	setTimeout(() => {
+		targetPoints = shapeToVector(pointCount);
+	}, 100);
+}
 
 function draw() {
 	background(220);
@@ -59,9 +67,13 @@ function draw() {
 		drawUserOutline();
 	}
 
-	drawPoints(points, "orange");
-	if (currentOutlineTarget.userPointsResampled)
-		drawPoints(currentOutlineTarget.userPointsResampled, "purple");
+	if (debugMode) {
+		drawPoints(targetPoints, "orange");
+		if (currentOutlineTarget.userPointsResampled)
+			drawPoints(currentOutlineTarget.userPointsResampled, "purple");
+		if (currentOutlineTarget.accuracy !== null)
+			text(`${currentOutlineTarget.accuracy}%`, 100, 100);
+	}
 }
 
 let drawing = false;
@@ -191,6 +203,10 @@ function handlePointerUp() {
 			currentOutlineTarget.userPointsResampled = resamplePoints(
 				currentOutlineTarget.userPoints,
 				pointCount
+			);
+			currentOutlineTarget.accuracy = compareShapes(
+				targetPoints,
+				currentOutlineTarget.userPointsResampled
 			);
 		}
 	}
@@ -334,6 +350,23 @@ function resamplePoints(ogPoints, numPoints) {
 	} else {
 		throw new Error("error. points should never be less than 2.");
 	}
+}
+
+function compareShapes(shapeA, shapeB) {
+	const pointCount = shapeA.length;
+	let totalScore = 100;
+	for (let i = 0; i < pointCount; i++) {
+		const pointA = shapeA[i];
+		const pointB = shapeB[i];
+		const distance = dist(
+			pointA.x,
+			pointA.y,
+			pointB.x,
+			pointB.y
+		);
+		totalScore -= distance / 1000;
+	}
+	return totalScore;
 }
 
 function drawPoints(points, fillColor) {
