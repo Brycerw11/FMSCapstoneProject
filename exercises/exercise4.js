@@ -4,13 +4,29 @@
 		The game gets hard by adding more shapes and adding moving shapes as the rounds continue.
 */
 
+// #region global variables
+	// Vars for handling the game's html canvas
+	let gameWidth = window.innerWidth;
+	let gameHeight = window.innerHeight;
+	var gameCanvasHTML;
+
+	// Vars for the game's core functionality
+	let inGame = false;
+	let inRound = false;
+	let roundNum = 0;
+	
+	let shapeList = [];
+	const totalHoldTimeMS = 3000;
+	let totalProgress = 0;
+
+	// Vars for calculating deltaTime
+	var lastFrame;
+	var thisFrame;
+	var deltams = 0;
+// #endregion
+
 // #region game setup
 // Game canvas setup
-let gameWidth = window.innerWidth;
-let gameHeight = window.innerHeight;
-
-var gameCanvasHTML;
-
 window.addEventListener("resize", function(){
 	gameWidth = window.innerWidth;
 	gameHeight = window.innerHeight;
@@ -62,8 +78,6 @@ function setup() {
 
 // #region Game Loop
 // One time functions
-let shapeList = [];
-
 // Function to create a new shape list
 function generateShapeList(numShapes, sizeInPx){
 	// Reset shape list
@@ -139,12 +153,8 @@ function drawShapeList(){
 		// Each shape class has its own drawing method
 		
 		// Draw shapes
-		if(shape.touching){
-			fill("#CFE2F3");
-		}
-		else{
-			fill("#FFFFFF");
-		}
+		let fillColor = (shape.touching)? "#CFE2F3" : "#FFFFFF";
+		fill(fillColor);
 		stroke("#000000");
 		strokeWeight(3);
 
@@ -158,7 +168,7 @@ function drawShapeList(){
 		}
 
 		// Draw shape progress
-		if(totalProgress == 0){continue;}
+		if(totalProgress <= 0){continue;}
 
 		fill("#6AA84F");
 		stroke("#000000");
@@ -176,9 +186,6 @@ function drawShapeList(){
 }
 
 // Function to update the round's progress
-const totalHoldTimeMS = 3000;
-let totalProgress = 0;
-
 function updateShapeProgress(){
 	let touchingAllShapes = true;
 
@@ -211,10 +218,6 @@ function updateShapeProgress(){
 }
 
 // Varaibles for calculating delta time in ms
-var lastFrame;
-var thisFrame;
-var deltams = 0;
-
 function draw() {
 	// Update delta time
 	lastFrame = thisFrame;
