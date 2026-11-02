@@ -2,17 +2,18 @@
 	Exercise 1 Description: Follow movements and line up items.
 */
 
-let debugMode = true;
+let debugMode = false;
 
 // the diameter within which the user can continue drawing if they accidentally lift their mouse (and the line will trail from last drawn point)
 const drawingToleranceR = 40;
 
 let currentOutlineTarget = null;
 
-function setup() {
-	const gameWidth = document.body.offsetWidth;
-	const gameHeight = document.body.offsetHeight;
 
+const gameWidth = document.body.offsetWidth;
+const gameHeight = document.body.offsetHeight;
+
+function setup() {
 	createCanvas(gameWidth, gameHeight);
 
 	background(220);
@@ -23,6 +24,7 @@ function setup() {
 		x: gameWidth/2,
 		y: gameHeight/2,
 		accuracy: null,
+		targetPosition: null,
 		userPoints: [],
 		userPointsResampled: [],
 		almostClosedAt: null,
@@ -40,9 +42,10 @@ function setup() {
 
 let targetPoints;
 
-const pointCount = 20;
+const pointCount = 50;
 
 // TODO: fix bug where you can draw essentially nothing
+// TODO: make points in other circle based on points in his circle
 
 if (debugMode) {
 	setTimeout(() => {
@@ -71,6 +74,7 @@ function draw() {
 		drawPoints(targetPoints, "orange");
 		if (currentOutlineTarget.userPointsResampled)
 			drawPoints(currentOutlineTarget.userPointsResampled, "purple");
+		textSize(40);
 		if (currentOutlineTarget.accuracy !== null)
 			text(`${currentOutlineTarget.accuracy}%`, 100, 100);
 	}
@@ -202,12 +206,17 @@ function handlePointerUp() {
 			currentOutlineTarget.closedAt = Date.now();
 			currentOutlineTarget.userPointsResampled = resamplePoints(
 				currentOutlineTarget.userPoints,
-				pointCount
+				pointCount,
+				targetPoints[0]
 			);
 			currentOutlineTarget.accuracy = compareShapes(
 				targetPoints,
 				currentOutlineTarget.userPointsResampled
 			);
+			currentOutlineTarget.targetPosition = {
+				x: random(0, gameWidth),
+				y: random(0, gameHeight)
+			};
 		}
 	}
 }
@@ -303,15 +312,34 @@ function shapeToVector(numPoints) {
 	return points;
 }
 
-function resamplePoints(ogPoints, numPoints) {
+function resamplePoints(ogPoints, numPoints, targetStart) {
 	if (ogPoints.length >= 2) {
 		const newPoints = [];
 
 		let totalDistance = 0;
 
-		for (let i = 1; i < ogPoints.length; i++) {
-			const pointA = ogPoints[i-1];
-			const pointB = ogPoints[i];
+		const closestPoint = [...ogPoints].sort((a, b) =>
+			dist(a.x, a.y, targetStart.x, targetStart.y) -
+			dist(b.x, b.y, targetStart.x, targetStart.y)	
+		)[0];
+
+		// console.log(closestPoint);
+
+		// console.log(dist(closestPoint[0].x, closestPoint[0].y, targetStart.x, targetStart.y));
+
+		const startIndex = ogPoints.indexOf(closestPoint);
+
+		const sortedPoints = [
+			...ogPoints.slice(startIndex, ogPoints.length),
+			...ogPoints.slice(0, startIndex)
+		];
+
+		console.log(ogPoints.length);
+		console.log(sortedPoints.length);
+
+		for (let i = 1; i < sortedPoints.length; i++) {
+			const pointA = sortedPoints[i-1];
+			const pointB = sortedPoints[i];
 			const distanceBetween = dist(
 				pointA.x,
 				pointA.y,
@@ -322,25 +350,25 @@ function resamplePoints(ogPoints, numPoints) {
 			totalDistance += distanceBetween;
 		}
 
-		console.log(totalDistance);
+		// console.log(totalDistance);
 
 		const targetSteps = totalDistance / numPoints;
 
 		newPoints.push({
-			x: ogPoints[0].x,
-			y: ogPoints[0].y
+			x: sortedPoints[0].x,
+			y: sortedPoints[0].y
 		});
 
 		let elapsedDistance = 0;
-		for (let i = 1; i < ogPoints.length; i++) {
-			elapsedDistance += ogPoints[i].distanceFromLast;
-			console.log("distance: " + elapsedDistance);
-			console.log("target: " + newPoints.length*targetSteps);
+		for (let i = 1; i < sortedPoints.length; i++) {
+			elapsedDistance += sortedPoints[i].distanceFromLast;
+			// console.log("distance: " + elapsedDistance);
+			// console.log("target: " + newPoints.length*targetSteps);
 			if (elapsedDistance >= newPoints.length*targetSteps) {
 				// elapsedDistance = 0;
 				newPoints.push({
-					x: ogPoints[i].x,
-					y: ogPoints[i].y
+					x: sortedPoints[i].x,
+					y: sortedPoints[i].y
 				});
 				if (newPoints.length >= numPoints) break;
 			}
@@ -354,7 +382,10 @@ function resamplePoints(ogPoints, numPoints) {
 
 function compareShapes(shapeA, shapeB) {
 	const pointCount = shapeA.length;
-	let totalScore = 100;
+
+	const maxError = 200;
+
+	const errorPercentsDir1 = [];
 	for (let i = 0; i < pointCount; i++) {
 		const pointA = shapeA[i];
 		const pointB = shapeB[i];
@@ -364,18 +395,64 @@ function compareShapes(shapeA, shapeB) {
 			pointB.x,
 			pointB.y
 		);
-		totalScore -= distance / 1000;
+		// totalScore -= distance / 1000;
+		errorPercentsDir1.push(Math.min(100, (distance / maxError)*100));
 	}
-	return totalScore;
+	
+	const reversedShapeA = [shapeA[0], ...shapeA.slice(1).toReversed()];
+	const errorPercentsDir2 = [];
+	for (let i = 0; i < pointCount; i++) {
+		const pointA = reversedShapeA[i];
+		const pointB = shapeB[i];
+		const distance = dist(
+			pointA.x,
+			pointA.y,
+			pointB.x,
+			pointB.y
+		);
+		// totalScore -= distance / 1000;
+		errorPercentsDir2.push(Math.min(100, (distance / maxError)*100));
+	}
+
+	const accuracyPercentDir1 = 100 -
+		errorPercentsDir1
+			.reduce((sum, current) => sum + current)
+			/ errorPercentsDir1.length;
+	const accuracyPercentDir2 = 100 -
+		errorPercentsDir2
+			.reduce((sum, current) => sum + current)
+			/ errorPercentsDir2.length;
+
+	console.log(errorPercentsDir1);
+	console.log(errorPercentsDir2);
+	console.log(`1: ${accuracyPercentDir1}%`);
+	console.log(`2: ${accuracyPercentDir2}%`);
+
+	const accuracyPercent = Math.round(
+		Math.max(accuracyPercentDir1, accuracyPercentDir2)
+		*100
+	)/100;
+
+	return accuracyPercent;
 }
 
 function drawPoints(points, fillColor) {
 	if (!points) return;
 	noStroke();
 	fill(fillColor);
-	for (const point of points) {
+	textSize(20);
+	if (fillColor == "orange") {
+		points = [points[0], ...points.slice(1).toReversed()];
+	}
+	for (let i = 0; i < points.length; i++) {
+		const point = points[i];
+		text(`#${i}`, point.x, point.y);
 		circle(point.x, point.y, 10);
 	}
+	// for (let i = 0; i < points.length; i++) {
+	// 	const point = points.toReversed()[i];
+	// 	circle(point.x, point.y, 10+i);
+	// }
 }
 
 /* #endregion */
