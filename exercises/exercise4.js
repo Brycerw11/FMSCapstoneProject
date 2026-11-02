@@ -260,8 +260,10 @@ function showRoundCompletePanel(){
 	if(timeRemaining == 0){
 		// The user lost the round
 		$("#round-complete-header").text("Round Over");
-		$("#next-round-info-text").hide();
-		$("#round-complete-text").text(`Good job, you made it through ${roundNum} rounds!!`)
+		$("#round-complete-text").text(`Good job, you made it through ${roundNum - 1} rounds!!`);
+		$("#next-round-info-text").text("Press the Play Again button to restart or use the nav bar to go somewhere else.");
+		
+		$("#next-round-button").text("Play Again");
 	}
 	else{
 		// The user won the round and show go to the next one
@@ -283,6 +285,7 @@ function showRoundCompletePanel(){
 		let nextRoundStatusString = `Round ${roundNum + 1} is next! It will have ${nextRoundShapes} shapes at ${nextRoundShapeSizeLabel} of their maximum size${nextRoundShapeSpeedLabel}. You'll have ${nextRoundTimer / 1000} seconds to complete it.`;
 		$("#next-round-info-text").show();
 		$("#next-round-info-text").text(nextRoundStatusString);
+		$("#next-round-button").text("Next Round")
 		roundNum++;
 	}
 
@@ -290,7 +293,7 @@ function showRoundCompletePanel(){
 	$("#round-complete-panel").show();
 }
 
-// TODO
+
 const roundProgression = [
 	{numShapes: 3, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 1
 	{numShapes: 4, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 2
