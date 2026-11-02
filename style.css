@@ -117,6 +117,7 @@ header h1, header h2{
 /* #region Side Navbar CSS */
 #nav-bar-container{
     position: fixed;
+    z-index: 5;
 }
 
 #nav-bar-show-button{
@@ -129,6 +130,7 @@ header h1, header h2{
     left: -40px;
 
     width: fit-content;
+    z-index: 4 !important;
 
     padding-left: 3rem;
     padding-right: 1rem;
