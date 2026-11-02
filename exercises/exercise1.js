@@ -202,7 +202,8 @@ function handlePointerUp() {
 			currentOutlineTarget.closedAt = Date.now();
 			currentOutlineTarget.userPointsResampled = resamplePoints(
 				currentOutlineTarget.userPoints,
-				pointCount
+				pointCount,
+				targetPoints[0]
 			);
 			currentOutlineTarget.accuracy = compareShapes(
 				targetPoints,
@@ -303,15 +304,34 @@ function shapeToVector(numPoints) {
 	return points;
 }
 
-function resamplePoints(ogPoints, numPoints) {
+function resamplePoints(ogPoints, numPoints, targetStart) {
 	if (ogPoints.length >= 2) {
 		const newPoints = [];
 
 		let totalDistance = 0;
 
-		for (let i = 1; i < ogPoints.length; i++) {
-			const pointA = ogPoints[i-1];
-			const pointB = ogPoints[i];
+		const closestPoint = [...ogPoints].sort((a, b) =>
+			dist(a.x, a.y, targetStart.x, targetStart.y) -
+			dist(b.x, b.y, targetStart.x, targetStart.y)	
+		)[0];
+
+		// console.log(closestPoint);
+
+		// console.log(dist(closestPoint[0].x, closestPoint[0].y, targetStart.x, targetStart.y));
+
+		const startIndex = ogPoints.indexOf(closestPoint);
+
+		const sortedPoints = [
+			...ogPoints.slice(startIndex, ogPoints.length),
+			...ogPoints.slice(0, startIndex)
+		];
+
+		console.log(ogPoints.length);
+		console.log(sortedPoints.length);
+
+		for (let i = 1; i < sortedPoints.length; i++) {
+			const pointA = sortedPoints[i-1];
+			const pointB = sortedPoints[i];
 			const distanceBetween = dist(
 				pointA.x,
 				pointA.y,
@@ -322,25 +342,25 @@ function resamplePoints(ogPoints, numPoints) {
 			totalDistance += distanceBetween;
 		}
 
-		console.log(totalDistance);
+		// console.log(totalDistance);
 
 		const targetSteps = totalDistance / numPoints;
 
 		newPoints.push({
-			x: ogPoints[0].x,
-			y: ogPoints[0].y
+			x: sortedPoints[0].x,
+			y: sortedPoints[0].y
 		});
 
 		let elapsedDistance = 0;
-		for (let i = 1; i < ogPoints.length; i++) {
-			elapsedDistance += ogPoints[i].distanceFromLast;
-			console.log("distance: " + elapsedDistance);
-			console.log("target: " + newPoints.length*targetSteps);
+		for (let i = 1; i < sortedPoints.length; i++) {
+			elapsedDistance += sortedPoints[i].distanceFromLast;
+			// console.log("distance: " + elapsedDistance);
+			// console.log("target: " + newPoints.length*targetSteps);
 			if (elapsedDistance >= newPoints.length*targetSteps) {
 				// elapsedDistance = 0;
 				newPoints.push({
-					x: ogPoints[i].x,
-					y: ogPoints[i].y
+					x: sortedPoints[i].x,
+					y: sortedPoints[i].y
 				});
 				if (newPoints.length >= numPoints) break;
 			}
