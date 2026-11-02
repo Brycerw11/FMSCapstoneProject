@@ -14,6 +14,7 @@
 	let inGame = false;
 	let inRound = false;
 	let timeRemaining = 0; //time remaining in the round in ms
+	let globalMoveSpeed = 0; //the speed at which the shapes move in units/second
 	let roundNum = 0;
 
 	let shapeList = [];
@@ -67,8 +68,8 @@ window.addEventListener("resize", function(){
 function startGame(){
 	roundNum = 1;
 	inRound = true;
-	timeRemaining = 60000;
-	generateShapeList(3, 150);
+	timeRemaining = roundProgression[0].time;
+	generateShapeList(roundProgression[0].numShapes, 150);
 	
 	$("#instructions-panel").hide();
 	updateRoundInfoPane();
@@ -102,24 +103,6 @@ function generateShapeList(numShapes, sizeInPx){
 	// Reset shape list
 	shapeList = [];
 
-	// Check to see if a new shape intersects with any existing shapes
-	function checkIntersections(xPos, yPos){
-		// false means there is no intersection
-		// true means there is an intersection
-		if(shapeList.length == 0){
-			return false;
-		}
-
-		// Loop through each shape to check for intersections
-		for(let shape of shapeList){
-			if(circleOverlapTest(xPos, yPos, shape.x, shape.y, sizeInPx / 2, shape.size / 2)){
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	// Loop to create numShapes shapes
 	for(let i = 0; i < numShapes; i++){
 		// Determine properties for this shape
@@ -147,10 +130,10 @@ function generateShapeList(numShapes, sizeInPx){
 				return;
 			}
 		}
-		while(checkIntersections(xPos, yPos))
+		while(checkIntersections(xPos, yPos, sizeInPx))
 
 		// Find a value between 0 and 360 degrees to rotate the shape by 
-		let shapeRotation = Number( (360 * Math.random()).toFixed(2) );
+		let shapeDirection = (2 * Math.PI * Math.random());
 
 		// Add this shape to the list
 		shapeList.push({
@@ -158,7 +141,7 @@ function generateShapeList(numShapes, sizeInPx){
 			x: xPos,
 			y: yPos,
 			size: sizeInPx,
-			rotation: shapeRotation,
+			direction: shapeDirection,
 			touching: false,
 		});
 	}
@@ -235,6 +218,37 @@ function updateShapeProgress(){
 	}	
 }
 
+function moveShapes(){
+	console.log('moving shapes!!');
+	for(const shape of shapeList){
+		shape.direction += -(Math.PI / 4) + Math.random() * (Math.PI / 2);
+
+		let moveAngle = shape.direction;
+		let currX = shape.x;
+		let currY = shape.y;
+
+		let nextX = shape.x + globalMoveSpeed * (deltams / 1000) * Math.cos(moveAngle);
+		let nextY = shape.y + globalMoveSpeed * (deltams / 1000) * Math.sin(moveAngle);
+
+		nextX = clamp(nextX, shape.size, gameWidth - shape.size);
+		nextY = clamp(nextY, shape.size, gameHeight - shape.size);
+
+		// Move the shape out of the way before checking for intersections
+		shape.x = -200;
+		shape.y = -200;
+
+		if(checkIntersections(nextX, nextY, shape.size)){
+			// The shape would move into another shape so don't move it
+			shape.x = currX;
+			shape.y = currY;
+		}
+		else{
+			shape.x = nextX;
+			shape.y = nextY;
+		}
+	}
+}
+
 // Update the round info pane
 function updateRoundInfoPane(){
 	$("#round-label").text(`Round: ${roundNum}`);
@@ -245,20 +259,68 @@ function showRoundCompletePanel(){
 	// Update panel contents
 	if(timeRemaining == 0){
 		// The user lost the round
+		$("#round-complete-header").text("Round Over");
+		$("#next-round-info-text").hide();
 		$("#round-complete-text").text(`Good job, you made it through ${roundNum} rounds!!`)
 	}
 	else{
 		// The user won the round and show go to the next one
-		timeLeft = new Decimal(timeRemaining / 1000);
-		$("#round-complete-text").text(`You made it through round #${roundNum}!!! It took you ${timeLeft.toFixed(1)} seconds!`)
+		$("#round-complete-header").text("Round Complete!");
+
+		let thisRoundsTimer = (roundNum - 1 < roundProgression.length)? roundProgression[roundNum - 1].time : 45000;
+		timeLeft = (thisRoundsTimer - timeRemaining) / 1000;
+		$("#round-complete-text").text(`You made it through Round ${roundNum}!!! It took you ${timeLeft.toFixed(1)} seconds!`);
+		
+		// Find and show the status of the next round
+		let nextRoundShapes = (roundNum < roundProgression.length)? roundProgression[roundNum].numShapes : roundProgression[roundProgression.length -1].numShapes;
+		let nextRoundTimer = (roundNum < roundProgression.length)? roundProgression[roundNum].time : roundProgression[roundProgression.length -1].time;
+		let nextRoundShapeSize = (roundNum < roundProgression.length)? roundProgression[roundNum].shapeSize : roundProgression[roundProgression.length -1].shapeSize;
+		let nextRoundShapeSpeed = (roundNum < roundProgression.length)? roundProgression[roundNum].shapeSpeed : roundProgression[roundProgression.length -1].shapeSpeed;
+
+		let nextRoundShapeSizeLabel = `${nextRoundShapeSize * 100}%`;
+		let nextRoundShapeSpeedLabel = (nextRoundShapeSpeed == 0)? `` : `, moving at ${nextRoundShapeSpeed} units/second`;
+
+		let nextRoundStatusString = `Round ${roundNum + 1} is next! It will have ${nextRoundShapes} shapes at ${nextRoundShapeSizeLabel} of their maximum size${nextRoundShapeSpeedLabel}. You'll have ${nextRoundTimer / 1000} seconds to complete it.`;
+		$("#next-round-info-text").show();
+		$("#next-round-info-text").text(nextRoundStatusString);
+		roundNum++;
 	}
 
+	// Show the round complete panel
 	$("#round-complete-panel").show();
 }
 
 // TODO
+const roundProgression = [
+	{numShapes: 3, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 1
+	{numShapes: 4, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 2
+	{numShapes: 5, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 3
+	{numShapes: 5, time: 50000, shapeSpeed: 0, shapeSize: 1,},    //round 4
+	{numShapes: 6, time: 50000, shapeSpeed: 0, shapeSize: 1,},    //round 5
+	{numShapes: 5, time: 50000, shapeSpeed: 10, shapeSize: 1,},   //round 6
+	{numShapes: 5, time: 40000, shapeSpeed: 15, shapeSize: 1,},   //round 7
+	{numShapes: 6, time: 50000, shapeSpeed: 15, shapeSize: 1,},   //round 8
+	{numShapes: 7, time: 50000, shapeSpeed: 15, shapeSize: 1,},   //round 9
+	{numShapes: 7, time: 45000, shapeSpeed: 15, shapeSize: 1,},   //round 9
+	{numShapes: 7, time: 45000, shapeSpeed: 15, shapeSize: 0.9,}, //round 10
+	{numShapes: 7, time: 45000, shapeSpeed: 20, shapeSize: 0.8,}, //round 11
+	{numShapes: 7, time: 45000, shapeSpeed: 25, shapeSize: 0.75,}, //round 12
+	{numShapes: 7, time: 45000, shapeSpeed: 30, shapeSize: 0.75,}, //round 13(+)
+]
 function nextRound(){
+	$("#round-complete-panel").hide();
+	
+	let nextRoundShapes = (roundNum -1 < roundProgression.length)? roundProgression[roundNum - 1].numShapes : roundProgression[roundProgression.length -1].numShapes;
+	timeRemaining = (roundNum -1 < roundProgression.length)? roundProgression[roundNum - 1].time : roundProgression[roundProgression.length -1].time;
 
+	let nextRoundShapeSize = (roundNum < roundProgression.length)? roundProgression[roundNum].shapeSize : roundProgression[roundProgression.length -1].shapeSize;
+	let nextRoundShapeSpeed = (roundNum < roundProgression.length)? roundProgression[roundNum].shapeSpeed : roundProgression[roundProgression.length -1].shapeSpeed;
+
+	generateShapeList(nextRoundShapes, 150 * nextRoundShapeSize);
+
+	totalProgress = 0;
+	globalMoveSpeed = nextRoundShapeSpeed;
+	inRound = true;
 }
 
 // #region Primary Draw Function
@@ -282,6 +344,10 @@ function nextRound(){
 		
 		// Calculate shape progress
 		if(inRound){
+			if(globalMoveSpeed > 0){
+				moveShapes();
+			}
+
 			updateShapeProgress();
 			
 			if(totalProgress >= 100){
@@ -327,6 +393,28 @@ function circleOverlapTest(x1, y1, x2, y2, r1, r2){
 	let radiiSumSquared = (r1 + r2) * (r1 + r2);
 
 	return (distanceSquared <= radiiSumSquared);
+}
+
+// Check to see if a new shape intersects with any existing shapes
+function checkIntersections(xPos, yPos, sizeInPx){
+	// false means there is no intersection
+	// true means there is an intersection
+	if(shapeList.length == 0){
+		return false;
+	}
+
+	// Loop through each shape to check for intersections
+	for(let shape of shapeList){
+		if(circleOverlapTest(xPos, yPos, shape.x, shape.y, sizeInPx / 2, shape.size / 2)){
+			return true;
+		}
+	}
+
+	return false;
+}
+
+function clamp(value, min, max){
+	return Math.min(Math.max(value, min), max);
 }
 
 function percentToPx(percentNum){
