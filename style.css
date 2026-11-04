@@ -161,6 +161,11 @@ header h1, header h2{
     overflow: auto;
 }
 
+#nav-bar-contents.headerless-nav-bar{
+    justify-content: space-evenly;
+    max-height: 82vh;
+}
+
 #nav-bar-contents #logo-container{
     display: flex;
     justify-content: center;

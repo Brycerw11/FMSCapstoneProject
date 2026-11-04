@@ -5,17 +5,34 @@ $(document).ready(function(){
         $("#nav-bar-show-button").css("top", (document.getElementsByTagName("header")[0].clientHeight + 16) + "px");
     }
 
-    // Start with the navbar hidden
+    // Instantiate navbar status variables
     let navBarWidth = $("#nav-bar-contents").outerWidth();
     let navBarVisible = false;
 
-    $("#nav-bar-contents").css("left", "-" + numToPxStr(navBarWidth));
+    // Start with the nav bar shown if the #nav-bar-container has the .start-showing or the .always-open classes
+    if(document.getElementById("nav-bar-container").classList.contains("always-open")){
+        $("#nav-bar-contents").css("left", "0");
+        navBarVisible = true;
+        $("#nav-bar-show-button").hide();
 
-    // Wait 100ms then reupdate the position of the navbar
-    setTimeout(() => {
-        navBarWidth = $("#nav-bar-contents").outerWidth();
+        openNavbar();
+    }
+    if(document.getElementById("nav-bar-container").classList.contains("start-showing")){
+        // Start with the navbar showing
+        $("#nav-bar-contents").css("left", "0");
+        openNavbar();
+    }
+    else{
+        // Start with the navbar hidden
+
+        // Wait 100ms then reupdate the position of the navbar to make sure its hidden
+        setTimeout(() => {
+            navBarWidth = $("#nav-bar-contents").outerWidth();
+            $("#nav-bar-contents").css("left", "-" + numToPxStr(navBarWidth));
+        }, 100);
+
         $("#nav-bar-contents").css("left", "-" + numToPxStr(navBarWidth));
-    }, 100);
+    }
 
     // Update navBarWidth when the window changes size
     window.addEventListener("resize", () => {
@@ -35,22 +52,32 @@ $(document).ready(function(){
         navBarWidth = $("#nav-bar-contents").outerWidth();
 
         if( !navBarVisible ){
-            // Open the nav bar
-            $("#nav-bar-contents").animate({left: numToPxStr(0)});
-            $("#nav-bar-show-button").animate({left: numToPxStr(navBarWidth - 40)});
-            $("#nav-bar-show-button").text("<");
-            navBarVisible = true;
+            openNavbar();
         }
         else{
             // Close the nav bar
-            $("#nav-bar-contents").animate({left: "-" + numToPxStr(navBarWidth)});
-            $("#nav-bar-show-button").animate({left: numToPxStr(-40)});
-            $("#nav-bar-show-button").text(">");
-            navBarVisible = false;
+            closeNavbar();
         }
     });
-});
+    
+    
+    function openNavbar(){
+        // Open the nav bar
+        $("#nav-bar-contents").animate({left: numToPxStr(0)});
+        $("#nav-bar-show-button").animate({left: numToPxStr(navBarWidth - 40)});
+        $("#nav-bar-show-button").text("<");
+        navBarVisible = true;
+    }
+    
+    function closeNavbar(){
+        // Close the nav bar
+        $("#nav-bar-contents").animate({left: "-" + numToPxStr(navBarWidth)});
+        $("#nav-bar-show-button").animate({left: numToPxStr(-40)});
+        $("#nav-bar-show-button").text(">");
+        navBarVisible = false;
+    }
 
+});
 
 // Functions for converting between numbers and strings in terms of pixels
 function pxStrToNum(pxString){
