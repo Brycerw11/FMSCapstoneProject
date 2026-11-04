@@ -13,10 +13,13 @@ let currentOutlineTarget = null;
 const gameWidth = document.body.offsetWidth;
 const gameHeight = document.body.offsetHeight;
 
-function setup() {
-	createCanvas(gameWidth, gameHeight);
+let targetPoints;
 
-	background(220);
+function setup() {
+	const canvas = createCanvas(gameWidth, gameHeight);
+	canvas.style("background-color", "rgb(220, 220, 220)");
+
+	// background(220);
 
 	currentOutlineTarget = {
 		type: "circle",
@@ -24,7 +27,7 @@ function setup() {
 		x: gameWidth/2,
 		y: gameHeight/2,
 		accuracy: null,
-		targetPosition: null,
+		targetHole: null,
 		userPoints: [],
 		userPointsResampled: [],
 		almostClosedAt: null,
@@ -38,29 +41,36 @@ function setup() {
 			offsetY: 0
 		}
 	};
+
+	targetPoints = shapeToVector(pointCount);
 }
 
-let targetPoints;
+// let targetPoints;
 
-const pointCount = 50;
+const pointCount = 30;
 
 // TODO: fix bug where you can draw essentially nothing
 // TODO: make points in other circle based on points in his circle
 
-if (debugMode) {
-	setTimeout(() => {
-		targetPoints = shapeToVector(pointCount);
-	}, 100);
-}
+// if (debugMode) {
+// 	setTimeout(() => {
+// 		targetPoints = shapeToVector(pointCount);
+// 	}, 100);
+// }
 
 function draw() {
-	background(220);
+	// background(220);
+
+	clear();
 
 	// text(String(currentOutlineTarget.dragInfo.startX), 50, 100);
 	// text(String(currentOutlineTarget.dragInfo.startY), 50, 150);
 	// text(String(overallOffsetX), 50, 200);
 
 	if (currentOutlineTarget) {
+		if (currentOutlineTarget.targetHole) {
+			drawHole();
+		}
 		const targetShapeAlpha = (
 			currentOutlineTarget.closedAt ?
 			Math.max(1-((Date.now()-currentOutlineTarget.closedAt)/50)) :
@@ -76,7 +86,7 @@ function draw() {
 			drawPoints(currentOutlineTarget.userPointsResampled, "purple");
 		textSize(40);
 		if (currentOutlineTarget.accuracy !== null)
-			text(`${currentOutlineTarget.accuracy}%`, 100, 100);
+			text(`${currentOutlineTarget.accuracy.toFixed(2)}%`, 100, 100);
 	}
 }
 
@@ -213,9 +223,10 @@ function handlePointerUp() {
 				targetPoints,
 				currentOutlineTarget.userPointsResampled
 			);
-			currentOutlineTarget.targetPosition = {
-				x: random(0, gameWidth),
-				y: random(0, gameHeight)
+			currentOutlineTarget.targetHole = {
+				x: random(100, gameWidth-100),
+				y: random(100, gameHeight-100),
+				createdAt: Date.now()
 			};
 		}
 	}
@@ -287,6 +298,69 @@ function drawUserOutline() {
 			circle(lastDrawnPoint.x, lastDrawnPoint.y, drawingToleranceR*0.8);
 		}
 	}
+}
+
+function drawHole() {
+	const targetHole = currentOutlineTarget.targetHole;
+	
+	if (!targetHole) alert("no hole to draw");
+
+	drawingContext.save();
+
+	const targetShapeAlpha =
+		Math.min(1, (Date.now()-targetHole.createdAt)/100);
+
+	drawingContext.globalAlpha = targetShapeAlpha;
+
+	console.log(targetShapeAlpha)
+
+	fill(220);
+	// fill(255, 0, 0);
+	circle(
+		targetHole.x,
+		targetHole.y,
+		currentOutlineTarget.diameter
+	);
+
+	// console.log(alpha);
+	stroke(0);
+	// stroke(0, 0, 0, targetShapeAlpha*200);
+	strokeWeight(2);
+	// drawingContext.setLineDash([10, 15]);
+	noFill();
+
+	drawingContext.save();
+
+	// drawingContext.save();
+	drawingContext.globalCompositeOperation = "source-atop";
+	drawingContext.shadowOffsetX = 5;
+	drawingContext.shadowOffsetY = 5;
+	drawingContext.shadowBlur = 4;
+	drawingContext.shadowColor = "rgba(0, 0, 0, 0.7)";
+	
+	if (currentOutlineTarget.type === "circle") {
+		circle(
+			targetHole.x,
+			targetHole.y,
+			currentOutlineTarget.diameter*1.3
+		);
+	}
+
+	drawingContext.restore();
+
+	drawHoleTarget(targetHole.x, targetHole.y);
+
+	drawingContext.restore();
+	
+	// drawingContext.setLineDash([]);
+}
+
+function drawHoleTarget(x, y) {
+	stroke(100);
+	// strokeCap(PROJECT);
+	strokeWeight(10);
+	line(x-25, y, x+25, y);
+	line(x, y-25, x, y+25);
 }
 
 /* #region Accuracy Math */
@@ -386,17 +460,21 @@ function compareShapes(shapeA, shapeB) {
 	const maxError = 200;
 
 	const errorPercentsDir1 = [];
-	for (let i = 0; i < pointCount; i++) {
-		const pointA = shapeA[i];
-		const pointB = shapeB[i];
-		const distance = dist(
-			pointA.x,
-			pointA.y,
-			pointB.x,
-			pointB.y
-		);
-		// totalScore -= distance / 1000;
-		errorPercentsDir1.push(Math.min(100, (distance / maxError)*100));
+	try {
+		for (let i = 0; i < pointCount; i++) {
+			const pointA = shapeA[i];
+			const pointB = shapeB[i];
+			const distance = dist(
+				pointA.x,
+				pointA.y,
+				pointB.x,
+				pointB.y
+			);
+			// totalScore -= distance / 1000;
+			errorPercentsDir1.push(Math.min(100, (distance / maxError)*100));
+		}
+	} catch {
+		alert("error. ran out of points.");
 	}
 	
 	const reversedShapeA = [shapeA[0], ...shapeA.slice(1).toReversed()];
