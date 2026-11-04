@@ -23,10 +23,6 @@ canvas {
 
 /* #region Site Header CSS */
 header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
     --x-padding: 1rem;
     width: calc(calc(100% - var(--x-padding)) - var(--x-padding));
     height: 18vh;
@@ -37,13 +33,16 @@ header{
     background-color: #76a5af;
 }
 
-#logo-image{
-    /* background-color: #FFFFFF; */
+header #logo-container{
+    display: flex;
+    align-items: center;
+    height: 18vh;
+    position: absolute;
+}
 
+#logo-image{
     width: 9vh;
     height: 9vh;
-
-    /* margin: 0 2rem 0 2rem; */
 
     border: 3px #FFFFFF solid;
     border-radius: 100%;
@@ -118,6 +117,7 @@ header h1, header h2{
 /* #region Side Navbar CSS */
 #nav-bar-container{
     position: fixed;
+    z-index: 5;
 }
 
 #nav-bar-show-button{
@@ -130,6 +130,7 @@ header h1, header h2{
     left: -40px;
 
     width: fit-content;
+    z-index: 4 !important;
 
     padding-left: 3rem;
     padding-right: 1rem;
