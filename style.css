@@ -13,6 +13,11 @@ canvas {
     display: block;
 }
 
+.justify-center{
+    display: flex;
+    justify-content: center;
+}
+
 /* #region Kanit CSS Font Styles */
 
 .kanit{
@@ -276,11 +281,15 @@ header h1, header h2{
 /* #region Settings Page CSS */
 
 #settings-content{
-    display: flex;
+    /* display: flex;
     justify-content: center;
-    
+     */
     padding: 1rem;
     padding-top: 3rem;
+}
+
+.setting-container{
+    margin: 1em;
 }
 
 #settings-content .settings-label{
@@ -288,9 +297,6 @@ header h1, header h2{
 }
 
 #settings-content .slider{
-    /* display: flex; */
-    /* justify-content: left; */
-
     width: 2em;
     height: fit-content;
 
