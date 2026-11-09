@@ -13,10 +13,10 @@
 
 	// Sound source for future attribution: https://pixabay.com/sound-effects/film-special-effects-success-340660/
 	const successSound = new Audio("../assets/audio/success-sfx.mp3");
-	successSound.volume = 0;
+	successSound.volume = .75;
 	// Sound source for future attribution: https://pixabay.com/sound-effects/film-special-effects-balloon-inflate-4-184055/
 	const balloonInflateSound = new Audio("../assets/audio/balloon-inflate-3s.mp3");
-	balloonInflateSound.volume = 0;
+	balloonInflateSound.volume = .75 / 2;
 
 	// Vars for the game's core functionality
 	let inGame = false;
@@ -28,6 +28,7 @@
 	let shapeList = [];
 	const totalHoldTimeMS = 3000;
 	let totalProgress = 0;
+	let highestRoundProgress = 0;
 
 	// Vars for calculating deltaTime
 	var lastFrame;
@@ -80,6 +81,8 @@ function startGame(){
 	roundNum = 1;
 	inRound = true;
 	timeRemaining = roundProgression[0].time;
+	totalProgress = 0;
+	highestRoundProgress = 0;
 	generateShapeList(roundProgression[0].numShapes, 150);
 	
 	$("#instructions-panel").hide();
@@ -236,7 +239,10 @@ function updateShapeProgress(){
 
 		if(newProgress >= 100){newProgress = 100;}
 
-		totalProgress = newProgress
+		totalProgress = newProgress;
+		if(totalProgress > highestRoundProgress){
+			highestRoundProgress = totalProgress;
+		}
 
 		if(balloonInflateSound.paused || balloonInflateSound.ended){
 			balloonInflateSound.currentTime = 0;
@@ -292,7 +298,7 @@ function showRoundCompletePanel(){
 	if(timeRemaining == 0){
 		// The user lost the round
 		$("#round-complete-header").text("Round Over");
-		$("#round-complete-text").text(`Good job, you made it through ${roundNum - 1} rounds!!`);
+		$("#round-complete-text").text(`Good job, you completed ${roundNum - 1} rounds and made it through ${highestRoundProgress.toFixed(2)}% of round ${roundNum}!!`);
 		$("#next-round-info-text").text("Press the Play Again button to restart or use the nav bar to go somewhere else.");
 		
 		$("#next-round-button").text("Play Again");
@@ -363,6 +369,7 @@ function nextRound(){
 	generateShapeList(nextRoundShapes, 150 * nextRoundShapeSize);
 
 	totalProgress = 0;
+	highestRoundProgress = 0;
 	globalMoveSpeed = nextRoundShapeSpeed;
 	inRound = true;
 
@@ -470,9 +477,8 @@ function addGameToMetrics(){
 
 	metricsListObj.gameList.push({
 		completedRounds: roundNum - 1,
+		finalRoundProgress: Number(highestRoundProgress.toFixed(2)),
 	});
-
-	console.log(metricsListObj);
 
 	localStorage.setItem("Shape Balancing Metrics", JSON.stringify(metricsListObj));
 }
