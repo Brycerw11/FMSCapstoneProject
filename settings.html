@@ -51,8 +51,29 @@
 	<script src="./navBar.js"></script>
 
 	<!-- Page Content -->
-		
-		
+	<div id="settings-content" class="kanit">
+		<!-- Audio Toggle Setting -->
+		<div class="justify-center setting-container">
+			<p class="settings-label">Audio Toggle: </p>
+			<div id="audio-toggle-slider" class="slider slider-on inline">
+				<div class="slider-handle"></div>
+			</div>
+		</div>
 
+		<!-- Audio Volume Setting -->
+		<div class="justify-center setting-container">
+			<p class="settings-label">Volume: </p>
+			<input type="range" name="volume" id="volume-range" min="0" max="100" value="75" class="inline">
+		</div>
+
+		<!-- TODO: Music Toggle Setting -->
+
+		<!-- TODO: Clear Settings Button -->
+		<div class="justify-center setting-container">
+			<button onclick="setDefaultSettings()">Reset Settings</button>
+		</div>
+	</div>
+		
+	<script src="./assets/scripts/settings.js"></script>
 </body>
 </html>

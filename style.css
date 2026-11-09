@@ -13,6 +13,11 @@ canvas {
     display: block;
 }
 
+.justify-center{
+    display: flex;
+    justify-content: center;
+}
+
 /* #region Kanit CSS Font Styles */
 
 .kanit{
@@ -266,4 +271,62 @@ header h1, header h2{
     justify-content: center;
     margin: 0 auto;
 }
+/* #endregion */
+
+/* #region Metrics Page CSS */
+
+/* #endregion */
+
+
+/* #region Settings Page CSS */
+
+#settings-content{
+    /* display: flex;
+    justify-content: center;
+     */
+    padding: 1rem;
+    padding-top: 3rem;
+}
+
+.setting-container{
+    margin: 1em;
+}
+
+#settings-content .settings-label{
+    margin: 0 0.5rem 0 0;
+}
+
+#settings-content .slider{
+    width: 2em;
+    height: fit-content;
+
+    padding: 0.15em;
+
+    border: 2px solid #FFFFFF;
+    border-radius: 16px;
+
+    background-color: #CCCCCC;
+    transition: background-color 0.5s;
+}
+#settings-content .slider-handle{
+    height: 1em;
+    width: 1em;
+
+    border-radius: 100%;
+
+    background-color: #FFFFFF;
+
+    transition: margin-left 0.5s;
+}
+#settings-content .slider.slider-on{ background-color: #2196F3; }
+#settings-content .slider.slider-on .slider-handle{
+    margin-left: 1em;
+}
+
+#settings-content button{
+    padding: 0.25em 1em 0.25em 1em;
+    border-radius: 16px;
+}
+
+
 /* #endregion */
