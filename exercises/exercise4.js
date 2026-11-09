@@ -11,6 +11,13 @@
 	let gameHeight = window.innerHeight;
 	var gameCanvasHTML;
 
+	// Sound source for future attribution: https://pixabay.com/sound-effects/film-special-effects-success-340660/
+	const successSound = new Audio("../assets/audio/success-sfx.mp3");
+	successSound.volume = 0;
+	// Sound source for future attribution: https://pixabay.com/sound-effects/film-special-effects-balloon-inflate-4-184055/
+	const balloonInflateSound = new Audio("../assets/audio/balloon-inflate-3s.mp3");
+	balloonInflateSound.volume = 0;
+
 	// Vars for the game's core functionality
 	let inGame = false;
 	let inRound = false;
@@ -80,12 +87,26 @@ function startGame(){
 
 // p5.js Setup
 function setup() {
+	// Set up game canvas
 	createCanvas(gameWidth, gameHeight);
 
 	gameCanvasHTML = document.getElementById("defaultCanvas0");
 
 	// This is required for the site to handle more than 3 touches at the same time
 	gameCanvasHTML.style.touchAction = "none";
+
+	// Get settings from local storage
+	let settingsObj = JSON.parse(localStorage.getItem("settings"));
+	if(settingsObj != null){
+		if(settingsObj.audioToggle === false){
+			successSound.volume = 0;
+			balloonInflateSound.volume = 0;
+		}
+		else if(settingsObj.volume != undefined){
+			successSound.volume = (settingsObj.volume / 100);
+			balloonInflateSound.volume = (settingsObj.volume / 100) / 2;
+		}
+	}
 
 	// Show instructions panel
 	$(document).ready(() => {
@@ -213,14 +234,19 @@ function updateShapeProgress(){
 		if(newProgress >= 100){newProgress = 100;}
 
 		totalProgress = newProgress
+
+		if(balloonInflateSound.paused || balloonInflateSound.ended){
+			balloonInflateSound.currentTime = 0;
+			balloonInflateSound.play();
+		}
 	}
 	else{
 		totalProgress = 0;
+		balloonInflateSound.pause();
 	}	
 }
 
 function moveShapes(){
-	console.log('moving shapes!!');
 	for(const shape of shapeList){
 		shape.direction += -(Math.PI / 4) + Math.random() * (Math.PI / 2);
 
@@ -257,6 +283,8 @@ function updateRoundInfoPane(){
 }
 
 function showRoundCompletePanel(){
+	balloonInflateSound.pause();
+
 	// Update panel contents
 	if(timeRemaining == 0){
 		// The user lost the round
@@ -288,6 +316,8 @@ function showRoundCompletePanel(){
 		$("#next-round-info-text").text(nextRoundStatusString);
 		$("#next-round-button").text("Next Round")
 		roundNum++;
+
+		successSound.play();
 	}
 
 	// Show the round complete panel
