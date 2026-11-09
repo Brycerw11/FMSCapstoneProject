@@ -33,6 +33,9 @@
 	var lastFrame;
 	var thisFrame;
 	var deltams = 0;
+
+	// Vars for tracking the games metrics
+	let metricsListObj = JSON.parse(localStorage.getItem("Shape Balancing Metrics"));
 // #endregion
 
 // #region game setup
@@ -293,6 +296,8 @@ function showRoundCompletePanel(){
 		$("#next-round-info-text").text("Press the Play Again button to restart or use the nav bar to go somewhere else.");
 		
 		$("#next-round-button").text("Play Again");
+
+		addGameToMetrics();
 	}
 	else{
 		// The user won the round and show go to the next one
@@ -451,8 +456,16 @@ function clamp(value, min, max){
 	return Math.min(Math.max(value, min), max);
 }
 
-function percentToPx(percentNum){
+function addGameToMetrics(){
+	if(metricsListObj === null){
+		metricsListObj = {gameList: []}
+	}
 
+	metricsListObj.gameList.push({
+		completedRounds: roundNum - 1,
+	});
+
+	console.log(metricsListObj);
 }
 
 // #endregion
