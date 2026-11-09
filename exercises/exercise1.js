@@ -290,6 +290,19 @@ function drawUserOutline() {
 	// endShape(CLOSE);
 	endShape();
 
+	// calculate where to place the center of the outlined shape
+	if (currentOutlineTarget.closedAt) {
+		const shapeVectors = userPoints.map(point =>
+			createVector(point.x+overallOffsetX, point.y+overallOffsetY)
+		);
+		const sum = createVector(0, 0);
+		for (const vector of shapeVectors) {
+			sum.add(vector);
+		}
+		sum.div(shapeVectors.length);
+		drawHoleTarget(sum.x, sum.y);
+	}
+
 	if (!currentOutlineTarget.closedAt) {
 		const lastDrawnPoint = getLastDrawnPoint();
 		if (lastDrawnPoint) {
