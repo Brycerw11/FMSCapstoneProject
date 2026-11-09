@@ -30,6 +30,10 @@ function setup() {
 		targetHole: null,
 		userPoints: [],
 		userPointsResampled: [],
+		userCenterX: null,
+		userCenterY: null,
+		userCanDrop: false,
+		dropAccuracy: 0,
 		almostClosedAt: null,
 		closedAt: null,
 		offsetX: 0,
@@ -170,6 +174,24 @@ function handlePointerDrag() {
 	) {
 		currentOutlineTarget.dragInfo.offsetX = mouseX - currentOutlineTarget.dragInfo.startX;
 		currentOutlineTarget.dragInfo.offsetY = mouseY - currentOutlineTarget.dragInfo.startY;
+		const currentX = (
+			currentOutlineTarget.userCenterX +
+			currentOutlineTarget.offsetX +
+			currentOutlineTarget.dragInfo.offsetX
+		);
+		const currentY = (
+			currentOutlineTarget.userCenterY +
+			currentOutlineTarget.offsetY +
+			currentOutlineTarget.dragInfo.offsetY
+		);
+		const dropDistance = dist(
+			currentX,
+			currentY,
+			currentOutlineTarget.targetHole.x,
+			currentOutlineTarget.targetHole.y
+		);
+		currentOutlineTarget.userCanDrop = dropDistance < 100;
+		currentOutlineTarget.dropAccuracy = 1 - dropDistance / 100;
 	} else if (!currentOutlineTarget.closedAt && drawing) {
 		// const lastDrawnPoint = getLastDrawnPoint();
 		// if (lastDrawnPoint) line(lastDrawnPoint.x, lastDrawnPoint.y, mouseX, mouseY);
@@ -213,6 +235,8 @@ function handlePointerUp() {
 		// console.log(currentOutlineTarget.almostClosedAt)
 
 		if (currentOutlineTarget.almostClosedAt) {
+			const userPoints = currentOutlineTarget.userPoints;
+
 			currentOutlineTarget.closedAt = Date.now();
 			currentOutlineTarget.userPointsResampled = resamplePoints(
 				currentOutlineTarget.userPoints,
@@ -228,6 +252,27 @@ function handlePointerUp() {
 				y: random(100, gameHeight-100),
 				createdAt: Date.now()
 			};
+
+			let minX = userPoints[0].x;
+			let maxX = userPoints[0].x;
+			let minY = userPoints[0].y;
+			let maxY = userPoints[0].y;
+			for (let i = 1; i < userPoints.length; i++) {
+				const userPoint = userPoints[i];
+				if (userPoint.x < minX) minX = userPoint.x;
+				if (userPoint.x > maxX) maxX = userPoint.x;
+				if (userPoint.y < minY) minY = userPoint.y;
+				if (userPoint.y > maxY) maxY = userPoint.y;
+			}
+			// const sum = createVector(0, 0);
+			// for (const vector of shapeVectors) {
+			// 	sum.add(vector);
+			// }
+			// sum.div(shapeVectors.length);
+			currentOutlineTarget.userCenterX = (minX + maxX) / 2;
+			currentOutlineTarget.userCenterY = (minY + maxY) / 2;
+			// console.log("center x: " + centerX);
+			// console.log("center y: " + centerY);
 		}
 	}
 }
@@ -261,7 +306,11 @@ function drawUserOutline() {
 	}
 	if (currentOutlineTarget.closedAt) {
 		// console.log("other")
-		fill(0, 255, 0, 30+Math.min(60, (Date.now()-currentOutlineTarget.closedAt)/3));
+		fill(
+			0, 255, 0,
+			(30+Math.min(60, (Date.now()-currentOutlineTarget.closedAt)/3))*
+			(currentOutlineTarget.userCanDrop ? (1-currentOutlineTarget.dropAccuracy) : 1)
+		);
 	}
 	beginShape();
 
@@ -295,27 +344,12 @@ function drawUserOutline() {
 		// const shapeVectors = userPoints.map(point =>
 		// 	createVector(point.x+overallOffsetX, point.y+overallOffsetY)
 		// );
-		let minX = userPoints[0].x;
-		let maxX = userPoints[0].x;
-		let minY = userPoints[0].y;
-		let maxY = userPoints[0].y;
-		for (let i = 1; i < userPoints.length; i++) {
-			const userPoint = userPoints[i];
-			if (userPoint.x < minX) minX = userPoint.x;
-			if (userPoint.x > maxX) maxX = userPoint.x;
-			if (userPoint.y < minY) minY = userPoint.y;
-			if (userPoint.y > maxY) maxY = userPoint.y;
-		}
-		// const sum = createVector(0, 0);
-		// for (const vector of shapeVectors) {
-		// 	sum.add(vector);
-		// }
-		// sum.div(shapeVectors.length);
-		const centerX = (minX + maxX) / 2 + overallOffsetX;
-		const centerY = (minY + maxY) / 2 + overallOffsetY;
-		console.log("center x: " + centerX);
-		console.log("center y: " + centerY);
-		drawHoleTarget(centerX, centerY);
+		// currentOutlineTarget.userCenterX;
+		// currentOutlineTarget.userCenterY
+		drawHoleTarget(
+			currentOutlineTarget.userCenterX + overallOffsetX,
+			currentOutlineTarget.userCenterY + overallOffsetY
+		);
 	}
 
 	if (!currentOutlineTarget.closedAt) {
@@ -342,7 +376,11 @@ function drawHole() {
 
 	console.log(targetShapeAlpha)
 
-	fill(220);
+	if (currentOutlineTarget.userCanDrop) {
+		fill(0, 255, 0, currentOutlineTarget.dropAccuracy * 150);
+	} else {
+		fill(220);
+	}
 	// fill(255, 0, 0);
 	circle(
 		targetHole.x,
