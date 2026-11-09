@@ -137,9 +137,6 @@ function generateShapeList(numShapes, sizeInPx){
 
 	// Loop to create numShapes shapes
 	for(let i = 0; i < numShapes; i++){
-		// Determine properties for this shape
-		let shapeClass = "circle";
-
 		// Find a position that does not intersect with other shapes
 		var xPos;
 		var yPos;
@@ -169,7 +166,6 @@ function generateShapeList(numShapes, sizeInPx){
 
 		// Add this shape to the list
 		shapeList.push({
-			class: shapeClass,
 			x: xPos,
 			y: yPos,
 			size: sizeInPx,
@@ -183,22 +179,13 @@ function generateShapeList(numShapes, sizeInPx){
 function drawShapeList(){
 	// draw each shape
 	for(const shape of shapeList){
-		// Each shape class has its own drawing method
-		
 		// Draw shapes
 		let fillColor = (shape.touching)? "#CFE2F3" : "#FFFFFF";
 		fill(fillColor);
 		stroke("#000000");
 		strokeWeight(3);
-
-		switch(shape.class){
-			case "circle":
-				circle(shape.x, shape.y, shape.size);
-				break;
-			default:
-				console.log("Unknown shape class; cannot draw shape");
-				break;
-		}
+		
+		circle(shape.x, shape.y, shape.size);
 
 		// Draw shape progress
 		if(totalProgress <= 0){continue;}
@@ -207,14 +194,7 @@ function drawShapeList(){
 		stroke("#000000");
 		strokeWeight(0);
 
-		switch(shape.class){
-			case "circle":
-				circle(shape.x, shape.y, (totalProgress / 100) * shape.size);
-				break;
-			default:
-				console.log("Unknown shape class; cannot draw shape");
-				break;
-		}
+		circle(shape.x, shape.y, (totalProgress / 100) * shape.size);
 	}
 }
 
