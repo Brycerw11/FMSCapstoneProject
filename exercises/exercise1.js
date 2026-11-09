@@ -292,15 +292,30 @@ function drawUserOutline() {
 
 	// calculate where to place the center of the outlined shape
 	if (currentOutlineTarget.closedAt) {
-		const shapeVectors = userPoints.map(point =>
-			createVector(point.x+overallOffsetX, point.y+overallOffsetY)
-		);
-		const sum = createVector(0, 0);
-		for (const vector of shapeVectors) {
-			sum.add(vector);
+		// const shapeVectors = userPoints.map(point =>
+		// 	createVector(point.x+overallOffsetX, point.y+overallOffsetY)
+		// );
+		let minX = userPoints[0].x;
+		let maxX = userPoints[0].x;
+		let minY = userPoints[0].y;
+		let maxY = userPoints[0].y;
+		for (let i = 1; i < userPoints.length; i++) {
+			const userPoint = userPoints[i];
+			if (userPoint.x < minX) minX = userPoint.x;
+			if (userPoint.x > maxX) maxX = userPoint.x;
+			if (userPoint.y < minY) minY = userPoint.y;
+			if (userPoint.y > maxY) maxY = userPoint.y;
 		}
-		sum.div(shapeVectors.length);
-		drawHoleTarget(sum.x, sum.y);
+		// const sum = createVector(0, 0);
+		// for (const vector of shapeVectors) {
+		// 	sum.add(vector);
+		// }
+		// sum.div(shapeVectors.length);
+		const centerX = (minX + maxX) / 2 + overallOffsetX;
+		const centerY = (minY + maxY) / 2 + overallOffsetY;
+		console.log("center x: " + centerX);
+		console.log("center y: " + centerY);
+		drawHoleTarget(centerX, centerY);
 	}
 
 	if (!currentOutlineTarget.closedAt) {
