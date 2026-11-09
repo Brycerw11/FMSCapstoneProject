@@ -365,6 +365,8 @@ function nextRound(){
 	totalProgress = 0;
 	globalMoveSpeed = nextRoundShapeSpeed;
 	inRound = true;
+
+	pointerMap.clear();
 }
 
 // #region Primary Draw Function
