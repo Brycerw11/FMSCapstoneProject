@@ -471,6 +471,8 @@ function addGameToMetrics(){
 	});
 
 	console.log(metricsListObj);
+
+	localStorage.setItem("Shape Balancing Metrics", JSON.stringify(metricsListObj));
 }
 
 // #endregion
