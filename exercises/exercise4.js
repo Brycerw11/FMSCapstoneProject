@@ -11,6 +11,10 @@
 	let gameHeight = window.innerHeight;
 	var gameCanvasHTML;
 
+	// Vars for the games' settings and audio
+	let defaultShapeSize = Math.round(0.155 * gameWidth);
+	// let defaultShapeSize = 150;
+
 	// Sound source for future attribution: https://pixabay.com/sound-effects/film-special-effects-success-340660/
 	const successSound = new Audio("../assets/audio/success-sfx.mp3");
 	successSound.volume = .75;
@@ -83,7 +87,7 @@ function startGame(){
 	timeRemaining = roundProgression[0].time;
 	totalProgress = 0;
 	highestRoundProgress = 0;
-	generateShapeList(roundProgression[0].numShapes, 150);
+	generateShapeList(roundProgression[0].numShapes, defaultShapeSize);
 	
 	$("#instructions-panel").hide();
 	updateRoundInfoPane();
@@ -153,7 +157,7 @@ function generateShapeList(numShapes, sizeInPx){
 			if(iterations > 20){
 				// If the shapes would be too smaller after making smaller just don't add any more shapes
 				if(!(sizeInPx - 50 < 25)){
-					generateShapeList(numShapes, sizeInPx - 50);
+					generateShapeList(numShapes, sizeInPx * 0.95);
 				}
 				return;
 			}
@@ -337,21 +341,27 @@ function showRoundCompletePanel(){
 
 
 const roundProgression = [
-	{numShapes: 3, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 1
-	{numShapes: 4, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 2
-	{numShapes: 5, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 3
-	{numShapes: 5, time: 50000, shapeSpeed: 0, shapeSize: 1,},    //round 4
-	{numShapes: 6, time: 50000, shapeSpeed: 0, shapeSize: 1,},    //round 5
-	{numShapes: 5, time: 50000, shapeSpeed: 10, shapeSize: 1,},   //round 6
-	{numShapes: 5, time: 40000, shapeSpeed: 15, shapeSize: 1,},   //round 7
-	{numShapes: 6, time: 50000, shapeSpeed: 15, shapeSize: 1,},   //round 8
-	{numShapes: 7, time: 50000, shapeSpeed: 15, shapeSize: 1,},   //round 9
-	{numShapes: 7, time: 45000, shapeSpeed: 15, shapeSize: 1,},   //round 9
-	{numShapes: 7, time: 45000, shapeSpeed: 15, shapeSize: 0.9,}, //round 10
-	{numShapes: 7, time: 45000, shapeSpeed: 20, shapeSize: 0.8,}, //round 11
-	{numShapes: 7, time: 45000, shapeSpeed: 25, shapeSize: 0.75,}, //round 12
-	{numShapes: 7, time: 45000, shapeSpeed: 30, shapeSize: 0.75,}, //round 13(+)
-]
+	{numShapes: 3, time: 60000, shapeSpeed: 0, shapeSize: 1,},      //round 1
+	{numShapes: 4, time: 60000, shapeSpeed: 0, shapeSize: 1,},      //round 2
+	{numShapes: 5, time: 60000, shapeSpeed: 0, shapeSize: 1,},      //round 3
+	{numShapes: 5, time: 50000, shapeSpeed: 0, shapeSize: 1,},      //round 4
+	{numShapes: 6, time: 50000, shapeSpeed: 0, shapeSize: 1,},      //round 5
+	{numShapes: 6, time: 45000, shapeSpeed: 0, shapeSize: 1,},      //round 6
+	{numShapes: 5, time: 45000, shapeSpeed: 10, shapeSize: 1,},     //round 7
+	{numShapes: 5, time: 45000, shapeSpeed: 15, shapeSize: 1,},     //round 8
+	{numShapes: 6, time: 45000, shapeSpeed: 15, shapeSize: 1,},     //round 9
+	{numShapes: 6, time: 45000, shapeSpeed: 20, shapeSize: 1,},     //round 10
+	{numShapes: 7, time: 45000, shapeSpeed: 15, shapeSize: 1,},     //round 11
+	{numShapes: 7, time: 40000, shapeSpeed: 15, shapeSize: 1,},     //round 12
+	{numShapes: 7, time: 40000, shapeSpeed: 15, shapeSize: 0.9,},   //round 13
+	{numShapes: 7, time: 40000, shapeSpeed: 20, shapeSize: 0.9,},   //round 14
+	{numShapes: 7, time: 40000, shapeSpeed: 20, shapeSize: 0.85,},  //round 15
+	{numShapes: 7, time: 40000, shapeSpeed: 25, shapeSize: 0.85,},  //round 16
+	{numShapes: 7, time: 40000, shapeSpeed: 20, shapeSize: 0.8,},   //round 17
+	{numShapes: 7, time: 40000, shapeSpeed: 25, shapeSize: 0.8,},   //round 18
+	{numShapes: 7, time: 40000, shapeSpeed: 25, shapeSize: 0.75,},  //round 19
+	{numShapes: 7, time: 40000, shapeSpeed: 30, shapeSize: 0.75,},  //round 20(+)
+];
 function nextRound(){
 	$("#round-complete-panel").hide();
 
@@ -366,7 +376,7 @@ function nextRound(){
 	let nextRoundShapeSize = (roundNum < roundProgression.length)? roundProgression[roundNum].shapeSize : roundProgression[roundProgression.length -1].shapeSize;
 	let nextRoundShapeSpeed = (roundNum < roundProgression.length)? roundProgression[roundNum].shapeSpeed : roundProgression[roundProgression.length -1].shapeSpeed;
 
-	generateShapeList(nextRoundShapes, 150 * nextRoundShapeSize);
+	generateShapeList(nextRoundShapes, defaultShapeSize * nextRoundShapeSize);
 
 	totalProgress = 0;
 	highestRoundProgress = 0;
