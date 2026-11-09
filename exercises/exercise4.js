@@ -343,6 +343,11 @@ const roundProgression = [
 ]
 function nextRound(){
 	$("#round-complete-panel").hide();
+
+	// If the game is currently over, start a new one at round 1
+	if(timeRemaining <= 0){
+		roundNum = 1;
+	}
 	
 	let nextRoundShapes = (roundNum -1 < roundProgression.length)? roundProgression[roundNum - 1].numShapes : roundProgression[roundProgression.length -1].numShapes;
 	timeRemaining = (roundNum -1 < roundProgression.length)? roundProgression[roundNum - 1].time : roundProgression[roundProgression.length -1].time;
