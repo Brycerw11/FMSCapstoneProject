@@ -11,12 +11,16 @@
 	let gameHeight = window.innerHeight;
 	var gameCanvasHTML;
 
+	// Vars for the games' settings and audio
+	let defaultShapeSize = Math.round(0.155 * gameWidth);
+	// let defaultShapeSize = 150;
+
 	// Sound source for future attribution: https://pixabay.com/sound-effects/film-special-effects-success-340660/
 	const successSound = new Audio("../assets/audio/success-sfx.mp3");
-	successSound.volume = 0;
+	successSound.volume = .75;
 	// Sound source for future attribution: https://pixabay.com/sound-effects/film-special-effects-balloon-inflate-4-184055/
 	const balloonInflateSound = new Audio("../assets/audio/balloon-inflate-3s.mp3");
-	balloonInflateSound.volume = 0;
+	balloonInflateSound.volume = .75 / 2;
 
 	// Vars for the game's core functionality
 	let inGame = false;
@@ -28,11 +32,15 @@
 	let shapeList = [];
 	const totalHoldTimeMS = 3000;
 	let totalProgress = 0;
+	let highestRoundProgress = 0;
 
 	// Vars for calculating deltaTime
 	var lastFrame;
 	var thisFrame;
 	var deltams = 0;
+
+	// Vars for tracking the games metrics
+	let metricsListObj = JSON.parse(localStorage.getItem("Shape Balancing Metrics"));
 // #endregion
 
 // #region game setup
@@ -77,7 +85,9 @@ function startGame(){
 	roundNum = 1;
 	inRound = true;
 	timeRemaining = roundProgression[0].time;
-	generateShapeList(roundProgression[0].numShapes, 150);
+	totalProgress = 0;
+	highestRoundProgress = 0;
+	generateShapeList(roundProgression[0].numShapes, defaultShapeSize);
 	
 	$("#instructions-panel").hide();
 	updateRoundInfoPane();
@@ -147,7 +157,7 @@ function generateShapeList(numShapes, sizeInPx){
 			if(iterations > 20){
 				// If the shapes would be too smaller after making smaller just don't add any more shapes
 				if(!(sizeInPx - 50 < 25)){
-					generateShapeList(numShapes, sizeInPx - 50);
+					generateShapeList(numShapes, sizeInPx * 0.95);
 				}
 				return;
 			}
@@ -233,7 +243,10 @@ function updateShapeProgress(){
 
 		if(newProgress >= 100){newProgress = 100;}
 
-		totalProgress = newProgress
+		totalProgress = newProgress;
+		if(totalProgress > highestRoundProgress){
+			highestRoundProgress = totalProgress;
+		}
 
 		if(balloonInflateSound.paused || balloonInflateSound.ended){
 			balloonInflateSound.currentTime = 0;
@@ -289,10 +302,12 @@ function showRoundCompletePanel(){
 	if(timeRemaining == 0){
 		// The user lost the round
 		$("#round-complete-header").text("Round Over");
-		$("#round-complete-text").text(`Good job, you made it through ${roundNum - 1} rounds!!`);
+		$("#round-complete-text").text(`Good job, you completed ${roundNum - 1} rounds and made it through ${highestRoundProgress.toFixed(2)}% of round ${roundNum}!!`);
 		$("#next-round-info-text").text("Press the Play Again button to restart or use the nav bar to go somewhere else.");
 		
 		$("#next-round-button").text("Play Again");
+
+		addGameToMetrics();
 	}
 	else{
 		// The user won the round and show go to the next one
@@ -326,21 +341,27 @@ function showRoundCompletePanel(){
 
 
 const roundProgression = [
-	{numShapes: 3, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 1
-	{numShapes: 4, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 2
-	{numShapes: 5, time: 60000, shapeSpeed: 0, shapeSize: 1,},    //round 3
-	{numShapes: 5, time: 50000, shapeSpeed: 0, shapeSize: 1,},    //round 4
-	{numShapes: 6, time: 50000, shapeSpeed: 0, shapeSize: 1,},    //round 5
-	{numShapes: 5, time: 50000, shapeSpeed: 10, shapeSize: 1,},   //round 6
-	{numShapes: 5, time: 40000, shapeSpeed: 15, shapeSize: 1,},   //round 7
-	{numShapes: 6, time: 50000, shapeSpeed: 15, shapeSize: 1,},   //round 8
-	{numShapes: 7, time: 50000, shapeSpeed: 15, shapeSize: 1,},   //round 9
-	{numShapes: 7, time: 45000, shapeSpeed: 15, shapeSize: 1,},   //round 9
-	{numShapes: 7, time: 45000, shapeSpeed: 15, shapeSize: 0.9,}, //round 10
-	{numShapes: 7, time: 45000, shapeSpeed: 20, shapeSize: 0.8,}, //round 11
-	{numShapes: 7, time: 45000, shapeSpeed: 25, shapeSize: 0.75,}, //round 12
-	{numShapes: 7, time: 45000, shapeSpeed: 30, shapeSize: 0.75,}, //round 13(+)
-]
+	{numShapes: 3, time: 60000, shapeSpeed: 0, shapeSize: 1,},      //round 1
+	{numShapes: 4, time: 60000, shapeSpeed: 0, shapeSize: 1,},      //round 2
+	{numShapes: 5, time: 60000, shapeSpeed: 0, shapeSize: 1,},      //round 3
+	{numShapes: 5, time: 50000, shapeSpeed: 0, shapeSize: 1,},      //round 4
+	{numShapes: 6, time: 50000, shapeSpeed: 0, shapeSize: 1,},      //round 5
+	{numShapes: 6, time: 45000, shapeSpeed: 0, shapeSize: 1,},      //round 6
+	{numShapes: 5, time: 45000, shapeSpeed: 10, shapeSize: 1,},     //round 7
+	{numShapes: 5, time: 45000, shapeSpeed: 15, shapeSize: 1,},     //round 8
+	{numShapes: 6, time: 45000, shapeSpeed: 15, shapeSize: 1,},     //round 9
+	{numShapes: 6, time: 45000, shapeSpeed: 20, shapeSize: 1,},     //round 10
+	{numShapes: 7, time: 45000, shapeSpeed: 15, shapeSize: 1,},     //round 11
+	{numShapes: 7, time: 40000, shapeSpeed: 15, shapeSize: 1,},     //round 12
+	{numShapes: 7, time: 40000, shapeSpeed: 15, shapeSize: 0.9,},   //round 13
+	{numShapes: 7, time: 40000, shapeSpeed: 20, shapeSize: 0.9,},   //round 14
+	{numShapes: 7, time: 40000, shapeSpeed: 20, shapeSize: 0.85,},  //round 15
+	{numShapes: 7, time: 40000, shapeSpeed: 25, shapeSize: 0.85,},  //round 16
+	{numShapes: 7, time: 40000, shapeSpeed: 20, shapeSize: 0.8,},   //round 17
+	{numShapes: 7, time: 40000, shapeSpeed: 25, shapeSize: 0.8,},   //round 18
+	{numShapes: 7, time: 40000, shapeSpeed: 25, shapeSize: 0.75,},  //round 19
+	{numShapes: 7, time: 40000, shapeSpeed: 30, shapeSize: 0.75,},  //round 20(+)
+];
 function nextRound(){
 	$("#round-complete-panel").hide();
 
@@ -355,11 +376,14 @@ function nextRound(){
 	let nextRoundShapeSize = (roundNum < roundProgression.length)? roundProgression[roundNum].shapeSize : roundProgression[roundProgression.length -1].shapeSize;
 	let nextRoundShapeSpeed = (roundNum < roundProgression.length)? roundProgression[roundNum].shapeSpeed : roundProgression[roundProgression.length -1].shapeSpeed;
 
-	generateShapeList(nextRoundShapes, 150 * nextRoundShapeSize);
+	generateShapeList(nextRoundShapes, defaultShapeSize * nextRoundShapeSize);
 
 	totalProgress = 0;
+	highestRoundProgress = 0;
 	globalMoveSpeed = nextRoundShapeSpeed;
 	inRound = true;
+
+	pointerMap.clear();
 }
 
 // #region Primary Draw Function
@@ -456,8 +480,17 @@ function clamp(value, min, max){
 	return Math.min(Math.max(value, min), max);
 }
 
-function percentToPx(percentNum){
+function addGameToMetrics(){
+	if(metricsListObj === null){
+		metricsListObj = {gameList: []}
+	}
 
+	metricsListObj.gameList.push({
+		completedRounds: roundNum - 1,
+		finalRoundProgress: Number(highestRoundProgress.toFixed(2)),
+	});
+
+	localStorage.setItem("Shape Balancing Metrics", JSON.stringify(metricsListObj));
 }
 
 // #endregion
