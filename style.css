@@ -323,5 +323,10 @@ header h1, header h2{
     margin-left: 1em;
 }
 
+#settings-content button{
+    padding: 0.25em 1em 0.25em 1em;
+    border-radius: 16px;
+}
+
 
 /* #endregion */

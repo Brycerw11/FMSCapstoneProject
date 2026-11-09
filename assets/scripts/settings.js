@@ -2,24 +2,17 @@
     The Javascript that goes with the settings page of the website
 */
 
+// get initial state from local storage
+let settingsObj = JSON.parse(localStorage.getItem("settings"));
+
 // Wait for jQuery to be ready
 $(function(){
-    // get initial state from local storage
-    let settingsObj = JSON.parse(localStorage.getItem("settings"));
-
-    console.log(settingsObj);
-    
     if(settingsObj === null || settingsObj.audioToggle == undefined || settingsObj.volume == undefined){
         setDefaultSettings();
     }
     
     // Update settings inputs to match inital state
-    $("#volume-range").val(settingsObj.volume);
-    $("#volume-range").prop("disabled", !settingsObj.audioToggle);
-
-    if(!settingsObj.audioToggle){
-        $("#audio-toggle-slider").removeClass("slider-on");
-    }
+    updateSettingsVisual();
 
     // Update local storage when settings are updated
     $("#audio-toggle-slider").on("click", () => {
@@ -42,10 +35,22 @@ $(function(){
 });
 
 function setDefaultSettings(){
-    let settingsStr = JSON.stringify({
+    settingsObj = {
         "audioToggle": true,
         "volume": 75,
-    });
+    };
+    let settingsStr = JSON.stringify(settingsObj);
 
     localStorage.setItem("settings", settingsStr);
+
+    updateSettingsVisual();
+}
+
+function updateSettingsVisual(){
+    $("#volume-range").val(settingsObj.volume);
+    $("#volume-range").prop("disabled", !settingsObj.audioToggle);
+
+    if(!settingsObj.audioToggle){
+        $("#audio-toggle-slider").removeClass("slider-on");
+    }
 }
