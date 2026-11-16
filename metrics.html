@@ -39,7 +39,7 @@
 	</header>
 
 	<!-- Nav Bar -->
-    <nav id="nav-bar-container" class="kanit start-showing">
+    <nav id="nav-bar-container" class="kanit">
         <div id="nav-bar-contents" class="headerless-nav-bar">
             <a class="nav-bar-button kanit" href="./index.html">Home</a>
             <a class="nav-bar-button kanit" href="./exerciseSelection.html">Games</a>
@@ -51,8 +51,24 @@
     <script src="./navBar.js"></script>
 
 	<!-- Page Content -->
+	<div id="metrics-page-content" class="page-contents kanit">
+		<div id="shape-drawing-metrics-container" class="extra-margin-top metrics-container">
+			<h2 class="fw-400">Shape Drawing Results</h2>
+		</div>
 		
+		<div id="cooking-metrics-container" class="metrics-container">
+			<h2 class="fw-400">Cooking Results</h2>
+			
+		</div>
 		
-
+		<div id="shape-balancing-metrics-container" class="metrics-container">
+			<h2 class="fw-400">Shape Balancing Results</h2>
+		
+			<p>Best Round: <span class="e4-high-score-value">-</span></p>
+			<p>Average Number of Completed Rounds: <span class="e4-avg-score-value">-</span></p>
+		</div>
+	</div>
+		
+	<script src="./assets/scripts/metrics.js"></script>
 </body>
 </html>

@@ -13,10 +13,21 @@ canvas {
     display: block;
 }
 
+/* #region Sitewide CSS Helper classes*/
 .justify-center{
     display: flex;
     justify-content: center;
 }
+
+.text-center{
+    text-align: center;
+}
+
+.fw-400{
+    font-weight: 400;
+}
+
+/* #endregion */
 
 /* #region Kanit CSS Font Styles */
 
@@ -25,6 +36,7 @@ canvas {
 }
 
 /* #endregion */
+
 
 /* #region Site Header CSS */
 header{
@@ -83,6 +95,7 @@ header h1, header h2{
 }
 /* #endregion */
 
+
 /* #region Homepage Content CSS */
 /*Buttons*/
 .buttons {
@@ -118,6 +131,7 @@ header h1, header h2{
 }
 
 /* #endregion */
+
 
 /* #region Side Navbar CSS */
 #nav-bar-container{
@@ -216,6 +230,7 @@ header h1, header h2{
 
 /* #endregion */
 
+
 /* #region - game selection page */
 .center-content {
     display: flex;
@@ -273,7 +288,26 @@ header h1, header h2{
 }
 /* #endregion */
 
+
 /* #region Metrics Page CSS */
+
+#metrics-page-content{
+    padding: 1em;
+}
+
+.extra-margin-top{
+    margin-top: 2.5em;
+}
+
+.metrics-container p{
+    text-indent: 1em;
+    font-weight: 550;
+}
+
+.metrics-container span{
+    text-indent: 1em;
+    font-weight: 400;
+}
 
 /* #endregion */
 
