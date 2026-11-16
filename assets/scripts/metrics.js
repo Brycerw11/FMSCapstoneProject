@@ -36,7 +36,7 @@ $(function (){
         }
 
         // Display e4 metric values
-        $(".e4-high-score-value").text(`${bestRoundProg}% of Round ${bestRound}`);
+        $(".e4-high-score-value").text(`Completed ${(bestRound + bestRoundProg / 100).toFixed(2)} Rounds`);
         $(".e4-avg-score-value").text(`${(sumScore / e4GameList.length).toFixed(2)}`);
 	}
     // #endregion
@@ -44,11 +44,14 @@ $(function (){
 
     // Function to reset metric after pressing reset metrics button
     $("#reset-metrics-button").on("click", function(){
-        if(confirm("Are you sure that you want to clear your metrics. This action cannot be undone!")){
+        if(confirm("Are you sure that you want to clear your metrics. \nThis action cannot be undone!")){
+            // Clear all of localStorage except the settings
             let storedSettings = localStorage.getItem("settings");
+            
             localStorage.clear();
             localStorage.setItem("settings", storedSettings);
 
+            // Reload the page to show the metrics were deleted
             window.location.reload();
         }
     });

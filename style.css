@@ -27,6 +27,10 @@ canvas {
     font-weight: 400;
 }
 
+.margin-bottom-0{
+    margin-bottom: 0;
+}
+
 /* #endregion */
 
 /* #region Kanit CSS Font Styles */
@@ -292,7 +296,8 @@ header h1, header h2{
 /* #region Metrics Page CSS */
 
 #metrics-page-content{
-    padding: 1em;
+    padding: 1.5em;
+    font-size: 1.1rem;
 }
 
 .extra-margin-top{
@@ -302,6 +307,8 @@ header h1, header h2{
 .metrics-container p{
     text-indent: 1em;
     font-weight: 550;
+    
+    margin-top: 0 1rem 0 1rem;
 }
 
 .metrics-container span{
@@ -312,6 +319,8 @@ header h1, header h2{
 #reset-metrics-button{
     padding: 0.25em 1em 0.25em 1em;
     border-radius: 16px;
+
+    font-size: 1em;
 }
 
 /* #endregion */
