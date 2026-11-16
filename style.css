@@ -64,9 +64,13 @@ header #logo-container{
 #logo-image{
     width: 9vh;
     height: 9vh;
+    padding: 0.4rem;
+    background-color: #45818e;
 
     border: 3px #FFFFFF solid;
     border-radius: 100%;
+
+    cursor: pointer;
 }
 
 header#site-title-container{
