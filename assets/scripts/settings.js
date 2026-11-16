@@ -8,7 +8,7 @@ let settingsObj = JSON.parse(localStorage.getItem("settings"));
 // Wait for jQuery to be ready
 $(function(){
     if(settingsObj === null || settingsObj.audioToggle == undefined || settingsObj.volume == undefined){
-        setDefaultSettings();
+        setDefaultSettings(false);
     }
     
     // Update settings inputs to match inital state
@@ -34,16 +34,29 @@ $(function(){
     }
 });
 
-function setDefaultSettings(){
-    if(confirm("Are you sure that you want to reset your settings to their default?\nThis action cannot be undone.")){
+function setDefaultSettings(shouldConfirm){
+    if(shouldConfirm){
+        if(confirm("Are you sure that you want to reset your settings to their default?\nThis action cannot be undone.")){
+            settingsObj = {
+                "audioToggle": true,
+                "volume": 75,
+            };
+            let settingsStr = JSON.stringify(settingsObj);
+        
+            localStorage.setItem("settings", settingsStr);
+        
+            updateSettingsVisual();
+        }
+    }
+    else{
         settingsObj = {
             "audioToggle": true,
             "volume": 75,
         };
         let settingsStr = JSON.stringify(settingsObj);
-    
+        
         localStorage.setItem("settings", settingsStr);
-    
+        
         updateSettingsVisual();
     }
 }
@@ -54,5 +67,8 @@ function updateSettingsVisual(){
 
     if(!settingsObj.audioToggle){
         $("#audio-toggle-slider").removeClass("slider-on");
+    }
+    else{
+        $("#audio-toggle-slider").addClass("slider-on");
     }
 }
