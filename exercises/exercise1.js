@@ -2,20 +2,24 @@
 	Exercise 1 Description: Follow movements and line up items.
 */
 
-let debugMode = true;
+let debugMode = false;
 
 // the diameter within which the user can continue drawing if they accidentally lift their mouse (and the line will trail from last drawn point)
 const drawingToleranceR = 40;
 
 let currentOutlineTarget = null;
 
+
+const gameWidth = document.body.offsetWidth;
+const gameHeight = document.body.offsetHeight;
+
+let targetPoints;
+
 function setup() {
-	const gameWidth = document.body.offsetWidth;
-	const gameHeight = document.body.offsetHeight;
+	const canvas = createCanvas(gameWidth, gameHeight);
+	canvas.style("background-color", "rgb(220, 220, 220)");
 
-	createCanvas(gameWidth, gameHeight);
-
-	background(220);
+	// background(220);
 
 	currentOutlineTarget = {
 		type: "circle",
@@ -23,8 +27,13 @@ function setup() {
 		x: gameWidth/2,
 		y: gameHeight/2,
 		accuracy: null,
+		targetHole: null,
 		userPoints: [],
 		userPointsResampled: [],
+		userCenterX: null,
+		userCenterY: null,
+		userCanDrop: false,
+		dropAccuracy: 0,
 		almostClosedAt: null,
 		closedAt: null,
 		offsetX: 0,
@@ -36,28 +45,36 @@ function setup() {
 			offsetY: 0
 		}
 	};
+
+	targetPoints = shapeToVector(pointCount);
 }
 
-let targetPoints;
+// let targetPoints;
 
-const pointCount = 20;
+const pointCount = 30;
 
 // TODO: fix bug where you can draw essentially nothing
+// TODO: make points in other circle based on points in his circle
 
-if (debugMode) {
-	setTimeout(() => {
-		targetPoints = shapeToVector(pointCount);
-	}, 100);
-}
+// if (debugMode) {
+// 	setTimeout(() => {
+// 		targetPoints = shapeToVector(pointCount);
+// 	}, 100);
+// }
 
 function draw() {
-	background(220);
+	// background(220);
+
+	clear();
 
 	// text(String(currentOutlineTarget.dragInfo.startX), 50, 100);
 	// text(String(currentOutlineTarget.dragInfo.startY), 50, 150);
 	// text(String(overallOffsetX), 50, 200);
 
 	if (currentOutlineTarget) {
+		if (currentOutlineTarget.targetHole) {
+			drawHole();
+		}
 		const targetShapeAlpha = (
 			currentOutlineTarget.closedAt ?
 			Math.max(1-((Date.now()-currentOutlineTarget.closedAt)/50)) :
@@ -71,8 +88,9 @@ function draw() {
 		drawPoints(targetPoints, "orange");
 		if (currentOutlineTarget.userPointsResampled)
 			drawPoints(currentOutlineTarget.userPointsResampled, "purple");
+		textSize(40);
 		if (currentOutlineTarget.accuracy !== null)
-			text(`${currentOutlineTarget.accuracy}%`, 100, 100);
+			text(`${currentOutlineTarget.accuracy.toFixed(2)}%`, 100, 100);
 	}
 }
 
@@ -156,6 +174,24 @@ function handlePointerDrag() {
 	) {
 		currentOutlineTarget.dragInfo.offsetX = mouseX - currentOutlineTarget.dragInfo.startX;
 		currentOutlineTarget.dragInfo.offsetY = mouseY - currentOutlineTarget.dragInfo.startY;
+		const currentX = (
+			currentOutlineTarget.userCenterX +
+			currentOutlineTarget.offsetX +
+			currentOutlineTarget.dragInfo.offsetX
+		);
+		const currentY = (
+			currentOutlineTarget.userCenterY +
+			currentOutlineTarget.offsetY +
+			currentOutlineTarget.dragInfo.offsetY
+		);
+		const dropDistance = dist(
+			currentX,
+			currentY,
+			currentOutlineTarget.targetHole.x,
+			currentOutlineTarget.targetHole.y
+		);
+		currentOutlineTarget.userCanDrop = dropDistance < 100;
+		currentOutlineTarget.dropAccuracy = 1 - dropDistance / 100;
 	} else if (!currentOutlineTarget.closedAt && drawing) {
 		// const lastDrawnPoint = getLastDrawnPoint();
 		// if (lastDrawnPoint) line(lastDrawnPoint.x, lastDrawnPoint.y, mouseX, mouseY);
@@ -199,15 +235,44 @@ function handlePointerUp() {
 		// console.log(currentOutlineTarget.almostClosedAt)
 
 		if (currentOutlineTarget.almostClosedAt) {
+			const userPoints = currentOutlineTarget.userPoints;
+
 			currentOutlineTarget.closedAt = Date.now();
 			currentOutlineTarget.userPointsResampled = resamplePoints(
 				currentOutlineTarget.userPoints,
-				pointCount
+				pointCount,
+				targetPoints[0]
 			);
 			currentOutlineTarget.accuracy = compareShapes(
 				targetPoints,
 				currentOutlineTarget.userPointsResampled
 			);
+			currentOutlineTarget.targetHole = {
+				x: random(100, gameWidth-100),
+				y: random(100, gameHeight-100),
+				createdAt: Date.now()
+			};
+
+			let minX = userPoints[0].x;
+			let maxX = userPoints[0].x;
+			let minY = userPoints[0].y;
+			let maxY = userPoints[0].y;
+			for (let i = 1; i < userPoints.length; i++) {
+				const userPoint = userPoints[i];
+				if (userPoint.x < minX) minX = userPoint.x;
+				if (userPoint.x > maxX) maxX = userPoint.x;
+				if (userPoint.y < minY) minY = userPoint.y;
+				if (userPoint.y > maxY) maxY = userPoint.y;
+			}
+			// const sum = createVector(0, 0);
+			// for (const vector of shapeVectors) {
+			// 	sum.add(vector);
+			// }
+			// sum.div(shapeVectors.length);
+			currentOutlineTarget.userCenterX = (minX + maxX) / 2;
+			currentOutlineTarget.userCenterY = (minY + maxY) / 2;
+			// console.log("center x: " + centerX);
+			// console.log("center y: " + centerY);
 		}
 	}
 }
@@ -241,7 +306,11 @@ function drawUserOutline() {
 	}
 	if (currentOutlineTarget.closedAt) {
 		// console.log("other")
-		fill(0, 255, 0, 30+Math.min(60, (Date.now()-currentOutlineTarget.closedAt)/3));
+		fill(
+			0, 255, 0,
+			(30+Math.min(60, (Date.now()-currentOutlineTarget.closedAt)/3))*
+			(currentOutlineTarget.userCanDrop ? (1-currentOutlineTarget.dropAccuracy) : 1)
+		);
 	}
 	beginShape();
 
@@ -270,6 +339,19 @@ function drawUserOutline() {
 	// endShape(CLOSE);
 	endShape();
 
+	// calculate where to place the center of the outlined shape
+	if (currentOutlineTarget.closedAt) {
+		// const shapeVectors = userPoints.map(point =>
+		// 	createVector(point.x+overallOffsetX, point.y+overallOffsetY)
+		// );
+		// currentOutlineTarget.userCenterX;
+		// currentOutlineTarget.userCenterY
+		drawHoleTarget(
+			currentOutlineTarget.userCenterX + overallOffsetX,
+			currentOutlineTarget.userCenterY + overallOffsetY
+		);
+	}
+
 	if (!currentOutlineTarget.closedAt) {
 		const lastDrawnPoint = getLastDrawnPoint();
 		if (lastDrawnPoint) {
@@ -278,6 +360,73 @@ function drawUserOutline() {
 			circle(lastDrawnPoint.x, lastDrawnPoint.y, drawingToleranceR*0.8);
 		}
 	}
+}
+
+function drawHole() {
+	const targetHole = currentOutlineTarget.targetHole;
+	
+	if (!targetHole) alert("no hole to draw");
+
+	drawingContext.save();
+
+	const targetShapeAlpha =
+		Math.min(1, (Date.now()-targetHole.createdAt)/100);
+
+	drawingContext.globalAlpha = targetShapeAlpha;
+
+	console.log(targetShapeAlpha)
+
+	if (currentOutlineTarget.userCanDrop) {
+		fill(0, 255, 0, currentOutlineTarget.dropAccuracy * 150);
+	} else {
+		fill(220);
+	}
+	// fill(255, 0, 0);
+	circle(
+		targetHole.x,
+		targetHole.y,
+		currentOutlineTarget.diameter
+	);
+
+	// console.log(alpha);
+	stroke(0);
+	// stroke(0, 0, 0, targetShapeAlpha*200);
+	strokeWeight(2);
+	// drawingContext.setLineDash([10, 15]);
+	noFill();
+
+	drawingContext.save();
+
+	// drawingContext.save();
+	drawingContext.globalCompositeOperation = "source-atop";
+	drawingContext.shadowOffsetX = 5;
+	drawingContext.shadowOffsetY = 5;
+	drawingContext.shadowBlur = 4;
+	drawingContext.shadowColor = "rgba(0, 0, 0, 0.7)";
+	
+	if (currentOutlineTarget.type === "circle") {
+		circle(
+			targetHole.x,
+			targetHole.y,
+			currentOutlineTarget.diameter*1.3
+		);
+	}
+
+	drawingContext.restore();
+
+	drawHoleTarget(targetHole.x, targetHole.y);
+
+	drawingContext.restore();
+	
+	// drawingContext.setLineDash([]);
+}
+
+function drawHoleTarget(x, y) {
+	stroke(100);
+	// strokeCap(PROJECT);
+	strokeWeight(10);
+	line(x-25, y, x+25, y);
+	line(x, y-25, x, y+25);
 }
 
 /* #region Accuracy Math */
@@ -303,15 +452,34 @@ function shapeToVector(numPoints) {
 	return points;
 }
 
-function resamplePoints(ogPoints, numPoints) {
+function resamplePoints(ogPoints, numPoints, targetStart) {
 	if (ogPoints.length >= 2) {
 		const newPoints = [];
 
 		let totalDistance = 0;
 
-		for (let i = 1; i < ogPoints.length; i++) {
-			const pointA = ogPoints[i-1];
-			const pointB = ogPoints[i];
+		const closestPoint = [...ogPoints].sort((a, b) =>
+			dist(a.x, a.y, targetStart.x, targetStart.y) -
+			dist(b.x, b.y, targetStart.x, targetStart.y)	
+		)[0];
+
+		// console.log(closestPoint);
+
+		// console.log(dist(closestPoint[0].x, closestPoint[0].y, targetStart.x, targetStart.y));
+
+		const startIndex = ogPoints.indexOf(closestPoint);
+
+		const sortedPoints = [
+			...ogPoints.slice(startIndex, ogPoints.length),
+			...ogPoints.slice(0, startIndex)
+		];
+
+		console.log(ogPoints.length);
+		console.log(sortedPoints.length);
+
+		for (let i = 1; i < sortedPoints.length; i++) {
+			const pointA = sortedPoints[i-1];
+			const pointB = sortedPoints[i];
 			const distanceBetween = dist(
 				pointA.x,
 				pointA.y,
@@ -322,25 +490,25 @@ function resamplePoints(ogPoints, numPoints) {
 			totalDistance += distanceBetween;
 		}
 
-		console.log(totalDistance);
+		// console.log(totalDistance);
 
 		const targetSteps = totalDistance / numPoints;
 
 		newPoints.push({
-			x: ogPoints[0].x,
-			y: ogPoints[0].y
+			x: sortedPoints[0].x,
+			y: sortedPoints[0].y
 		});
 
 		let elapsedDistance = 0;
-		for (let i = 1; i < ogPoints.length; i++) {
-			elapsedDistance += ogPoints[i].distanceFromLast;
-			console.log("distance: " + elapsedDistance);
-			console.log("target: " + newPoints.length*targetSteps);
+		for (let i = 1; i < sortedPoints.length; i++) {
+			elapsedDistance += sortedPoints[i].distanceFromLast;
+			// console.log("distance: " + elapsedDistance);
+			// console.log("target: " + newPoints.length*targetSteps);
 			if (elapsedDistance >= newPoints.length*targetSteps) {
 				// elapsedDistance = 0;
 				newPoints.push({
-					x: ogPoints[i].x,
-					y: ogPoints[i].y
+					x: sortedPoints[i].x,
+					y: sortedPoints[i].y
 				});
 				if (newPoints.length >= numPoints) break;
 			}
@@ -354,9 +522,31 @@ function resamplePoints(ogPoints, numPoints) {
 
 function compareShapes(shapeA, shapeB) {
 	const pointCount = shapeA.length;
-	let totalScore = 100;
+
+	const maxError = 200;
+
+	const errorPercentsDir1 = [];
+	try {
+		for (let i = 0; i < pointCount; i++) {
+			const pointA = shapeA[i];
+			const pointB = shapeB[i];
+			const distance = dist(
+				pointA.x,
+				pointA.y,
+				pointB.x,
+				pointB.y
+			);
+			// totalScore -= distance / 1000;
+			errorPercentsDir1.push(Math.min(100, (distance / maxError)*100));
+		}
+	} catch {
+		alert("error. ran out of points.");
+	}
+	
+	const reversedShapeA = [shapeA[0], ...shapeA.slice(1).toReversed()];
+	const errorPercentsDir2 = [];
 	for (let i = 0; i < pointCount; i++) {
-		const pointA = shapeA[i];
+		const pointA = reversedShapeA[i];
 		const pointB = shapeB[i];
 		const distance = dist(
 			pointA.x,
@@ -364,18 +554,49 @@ function compareShapes(shapeA, shapeB) {
 			pointB.x,
 			pointB.y
 		);
-		totalScore -= distance / 1000;
+		// totalScore -= distance / 1000;
+		errorPercentsDir2.push(Math.min(100, (distance / maxError)*100));
 	}
-	return totalScore;
+
+	const accuracyPercentDir1 = 100 -
+		errorPercentsDir1
+			.reduce((sum, current) => sum + current)
+			/ errorPercentsDir1.length;
+	const accuracyPercentDir2 = 100 -
+		errorPercentsDir2
+			.reduce((sum, current) => sum + current)
+			/ errorPercentsDir2.length;
+
+	console.log(errorPercentsDir1);
+	console.log(errorPercentsDir2);
+	console.log(`1: ${accuracyPercentDir1}%`);
+	console.log(`2: ${accuracyPercentDir2}%`);
+
+	const accuracyPercent = Math.round(
+		Math.max(accuracyPercentDir1, accuracyPercentDir2)
+		*100
+	)/100;
+
+	return accuracyPercent;
 }
 
 function drawPoints(points, fillColor) {
 	if (!points) return;
 	noStroke();
 	fill(fillColor);
-	for (const point of points) {
+	textSize(20);
+	if (fillColor == "orange") {
+		points = [points[0], ...points.slice(1).toReversed()];
+	}
+	for (let i = 0; i < points.length; i++) {
+		const point = points[i];
+		text(`#${i}`, point.x, point.y);
 		circle(point.x, point.y, 10);
 	}
+	// for (let i = 0; i < points.length; i++) {
+	// 	const point = points.toReversed()[i];
+	// 	circle(point.x, point.y, 10+i);
+	// }
 }
 
 /* #endregion */
