@@ -35,15 +35,17 @@ $(function(){
 });
 
 function setDefaultSettings(){
-    settingsObj = {
-        "audioToggle": true,
-        "volume": 75,
-    };
-    let settingsStr = JSON.stringify(settingsObj);
-
-    localStorage.setItem("settings", settingsStr);
-
-    updateSettingsVisual();
+    if(confirm("Are you sure that you want to reset your settings to their default?\nThis action cannot be undone.")){
+        settingsObj = {
+            "audioToggle": true,
+            "volume": 75,
+        };
+        let settingsStr = JSON.stringify(settingsObj);
+    
+        localStorage.setItem("settings", settingsStr);
+    
+        updateSettingsVisual();
+    }
 }
 
 function updateSettingsVisual(){
