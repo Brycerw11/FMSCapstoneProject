@@ -309,6 +309,11 @@ header h1, header h2{
     font-weight: 400;
 }
 
+#reset-metrics-button{
+    padding: 0.25em 1em 0.25em 1em;
+    border-radius: 16px;
+}
+
 /* #endregion */
 
 

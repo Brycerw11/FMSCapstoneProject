@@ -1,12 +1,20 @@
 // Wait for jQuery to be ready
 $(function (){
 
-    // Load Shape Balancing (e4) Metrics
+    // #region Load Shape Drawing (e1) Metrics
+
+    // #endregion
+    
+    // #region Load Cooking (e2) Metrics
+
+    // #endregion
+
+    // #region Load Shape Balancing (e4) Metrics
     let e4MetricsListObj = JSON.parse(localStorage.getItem("Shape Balancing Metrics"));
     
     if(e4MetricsListObj !== null){
         let e4GameList = e4MetricsListObj.gameList;
-        console.log(e4GameList);
+        // console.log(e4GameList);
 
 		let sumScore = 0;
         let bestRound = e4GameList[0].completedRounds;
@@ -24,7 +32,6 @@ $(function (){
                 }
             }
 
-            console.log(`This round's score: ${bestRound + (game.finalRoundProgress / 100)}`)
             sumScore += game.completedRounds + (game.finalRoundProgress / 100);
         }
 
@@ -32,6 +39,17 @@ $(function (){
         $(".e4-high-score-value").text(`${bestRoundProg}% of Round ${bestRound}`);
         $(".e4-avg-score-value").text(`${(sumScore / e4GameList.length).toFixed(2)}`);
 	}
+    // #endregion
 
 
+    // Function to reset metric after pressing reset metrics button
+    $("#reset-metrics-button").on("click", function(){
+        if(confirm("Are you sure that you want to clear your metrics. This action cannot be undone!")){
+            let storedSettings = localStorage.getItem("settings");
+            localStorage.clear();
+            localStorage.setItem("settings", storedSettings);
+
+            window.location.reload();
+        }
+    });
 });
