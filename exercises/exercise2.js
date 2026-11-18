@@ -1,9 +1,6 @@
 /* 
 	Exercise 2 Description: Cooking game where you slice ingredients and drag them to cook
 */
-const gameWidth = document.body.offsetWidth;
-const gameHeight = document.body.offsetHeight;
-
 let homePage = true;
 let pressed = false;
 let info = false;
@@ -49,6 +46,7 @@ let slice4X;
 let slice4Y;
 let slice5X;
 let slice5Y;
+
 let draggingPiece = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
@@ -65,6 +63,16 @@ let carrotSlice5Placed = false;
 let targetY;
 let targetLeft;
 let targetRight;
+let sceneScale;
+
+const referenceWidth = 1904;
+const referenceHeight = 1080;
+const boardWidth = 473;
+const boardHeight = 800;
+const ingredientWidth = 676;
+const ingredientHeight = 712;
+let boardX;
+let boardY;
 
 let cutProgress = 0;
 let cuts = 0;
@@ -88,31 +96,40 @@ function preload(){
 }
 
 function setup(){
-	
-
-	createCanvas(gameWidth, gameHeight);
+	createCanvas(windowWidth, windowHeight);
 	background(240);
 
-	carrotX = gameWidth / 4 - 300;
-    carrotY = gameHeight / 4;
-
-	dragX = carrotX;
-	dragY = carrotY + 5;
-	slice2X = carrotX+5;
-	slice2Y = carrotY;
-	slice3X = carrotX;
-	slice3Y = carrotY - 50;
-	slice4X = carrotX;
-	slice4Y = carrotY - 30;
-	slice5X = carrotX-3;
-	slice5Y = carrotY - 20;
-    targetY = carrotY + 100;
-    targetLeft = carrotX + 250
-    targetRight = carrotX + 400;
-
+	setSceneLayout();
 
 	let j = false;
 
+}
+
+function setSceneLayout(){
+	sceneScale = Math.min(width / referenceWidth, height / referenceHeight, 1);
+	boardX = width * 290 / referenceWidth;
+	boardY = height * 100 / referenceHeight;
+	carrotX = boardX + (boardWidth / 2 - 350) * sceneScale;
+	carrotY = boardY + 170 * sceneScale;
+
+	dragX = carrotX;
+	dragY = carrotY + 5 * sceneScale;
+	slice2X = carrotX + 5 * sceneScale;
+	slice2Y = carrotY;
+	slice3X = carrotX;
+	slice3Y = carrotY - 50 * sceneScale;
+	slice4X = carrotX;
+	slice4Y = carrotY - 30 * sceneScale;
+	slice5X = carrotX - 3 * sceneScale;
+	slice5Y = carrotY - 20 * sceneScale;
+	targetY = carrotY + 100 * sceneScale;
+	targetLeft = carrotX + 250 * sceneScale;
+	targetRight = carrotX + 400 * sceneScale;
+}
+
+function windowResized(){
+	resizeCanvas(windowWidth, windowHeight);
+	setSceneLayout();
 }
 
 function draw(){
@@ -211,43 +228,43 @@ function drawGame1() {
 		console.log("cutProgress: ", cutProgress, " Cuts: ", cuts)
     }
 
-	image(cuttingBoard, 290, 100, 473, 800);
-	image(carrot, carrotX, carrotY);
+	image(cuttingBoard, boardX, boardY, boardWidth * sceneScale, boardHeight * sceneScale);
+	drawIngredient(carrot, carrotX, carrotY);
 	//image(cuts >= 2 ? carrotSlice2, carrotX, carrotY);
 
 
 	if(cuts == 1){
 		carrot = cutCarrot1;
-		targetY = carrotY + 150
+		targetY = carrotY + 150 * sceneScale;
 	}
 	if(cuts >= 2){
 		carrot = cutCarrot2;
-		targetY = carrotY + 200
+		targetY = carrotY + 200 * sceneScale;
 		
-		image(carrotSlice2, slice2X, slice2Y);
+		drawIngredient(carrotSlice2, slice2X, slice2Y);
 	}
 	 if(cuts >= 3){
 		carrot = cutCarrot3;
-		targetY = carrotY + 290
+		targetY = carrotY + 290 * sceneScale;
 
 	 	if(!carrotSlice3Unlocked){
-	 		image(carrotSlice3, slice3X, slice3Y);
+	 		drawIngredient(carrotSlice3, slice3X, slice3Y);
 	 	}
 	}
 	 if(cuts >= 4){
 		carrot = cutCarrot4;
-		targetY = carrotY + 350
+		targetY = carrotY + 350 * sceneScale;
 
 	 	if(!carrotSlice4Unlocked){
-	 		image(carrotSlice4, slice4X, slice4Y);
+	 		drawIngredient(carrotSlice4, slice4X, slice4Y);
 	 	}
 	}
 	 if (cuts == 5){
 		carrot = cutCarrot5;
-		targetY = carrotY + 400
+		targetY = carrotY + 400 * sceneScale;
 		
 	 	if(!carrotSlice5Unlocked){
-	 		image(carrotSlice5, slice5X, slice5Y);
+	 		drawIngredient(carrotSlice5, slice5X, slice5Y);
 	 	}
 	}
 	 if(cuts >= 5){
@@ -256,28 +273,28 @@ function drawGame1() {
 	}
 
 	if(!dragging){
-		image(carrotTop, carrotX, carrotY+5);
+		drawIngredient(carrotTop, carrotX, carrotY + 5 * sceneScale);
 	}
 
 	if(cutting){
 		stroke(255, 0, 0);
-		strokeWeight(4);
+		strokeWeight(4 * sceneScale);
 		line(targetLeft, targetY, targetRight, targetY);
 	}
 
 	if(dragging){
-		image(carrotTop, dragX, dragY);
+		drawIngredient(carrotTop, dragX, dragY);
 		if(carrotSlice2Unlocked){
-			image(carrotSlice2, slice2X, slice2Y);
+			drawIngredient(carrotSlice2, slice2X, slice2Y);
 		}
 		if(carrotSlice3Unlocked){
-			image(carrotSlice3, slice3X, slice3Y);
+			drawIngredient(carrotSlice3, slice3X, slice3Y);
 		}
 		if(carrotSlice4Unlocked){
-			image(carrotSlice4, slice4X, slice4Y);
+			drawIngredient(carrotSlice4, slice4X, slice4Y);
 		}
 		if(carrotSlice5Unlocked){
-			image(carrotSlice5, slice5X, slice5Y);
+			drawIngredient(carrotSlice5, slice5X, slice5Y);
 		}
 	}
 
@@ -315,6 +332,10 @@ function drawGame1() {
 		
 
 	}
+}
+
+function drawIngredient(ingredient, x, y){
+	image(ingredient, x, y, ingredientWidth * sceneScale, ingredientHeight * sceneScale);
 }
 
 function mouseClicked(){
@@ -377,36 +398,36 @@ function mousePressed(){
 	}
 
 	if(!carrotTopPlaced &&
-		mouseX >= dragX && mouseX <= dragX + carrotTop.width &&
-		mouseY >= dragY && mouseY <= dragY + carrotTop.height){
+		mouseX >= dragX && mouseX <= dragX + carrotTop.width * sceneScale &&
+		mouseY >= dragY && mouseY <= dragY + carrotTop.height * sceneScale){
 		draggingPiece = 'carrotTop';
 		dragOffsetX = mouseX - dragX;
 		dragOffsetY = mouseY - dragY;
 	}else if(carrotSlice2Unlocked &&
 		!carrotSlice2Placed &&
-		mouseX >= slice2X && mouseX <= slice2X + carrotSlice2.width &&
-		mouseY >= slice2Y && mouseY <= slice2Y + carrotSlice2.height){
+		mouseX >= slice2X && mouseX <= slice2X + carrotSlice2.width * sceneScale &&
+		mouseY >= slice2Y && mouseY <= slice2Y + carrotSlice2.height * sceneScale){
 		draggingPiece = 'carrotSlice2';
 		dragOffsetX = mouseX - slice2X;
 		dragOffsetY = mouseY - slice2Y;
 	}else if(carrotSlice3Unlocked &&
 		!carrotSlice3Placed &&
-		mouseX >= slice3X && mouseX <= slice3X + carrotSlice3.width &&
-		mouseY >= slice3Y && mouseY <= slice3Y + carrotSlice3.height){
+		mouseX >= slice3X && mouseX <= slice3X + carrotSlice3.width * sceneScale &&
+		mouseY >= slice3Y && mouseY <= slice3Y + carrotSlice3.height * sceneScale){
 		draggingPiece = 'carrotSlice3';
 		dragOffsetX = mouseX - slice3X;
 		dragOffsetY = mouseY - slice3Y;
 	}else if(carrotSlice4Unlocked &&
 		!carrotSlice4Placed &&
-		mouseX >= slice4X && mouseX <= slice4X + carrotSlice4.width &&
-		mouseY >= slice4Y && mouseY <= slice4Y + carrotSlice4.height){
+		mouseX >= slice4X && mouseX <= slice4X + carrotSlice4.width * sceneScale &&
+		mouseY >= slice4Y && mouseY <= slice4Y + carrotSlice4.height * sceneScale){
 		draggingPiece = 'carrotSlice4';
 		dragOffsetX = mouseX - slice4X;
 		dragOffsetY = mouseY - slice4Y;
 	}else if(carrotSlice5Unlocked &&
 		!carrotSlice5Placed &&
-		mouseX >= slice5X && mouseX <= slice5X + carrotSlice5.width &&
-		mouseY >= slice5Y && mouseY <= slice5Y + carrotSlice5.height){
+		mouseX >= slice5X && mouseX <= slice5X + carrotSlice5.width * sceneScale &&
+		mouseY >= slice5Y && mouseY <= slice5Y + carrotSlice5.height * sceneScale){
 		draggingPiece = 'carrotSlice5';
 		dragOffsetX = mouseX - slice5X;
 		dragOffsetY = mouseY - slice5Y;
@@ -442,29 +463,31 @@ function mouseDragged(){
 }
 
 function mouseReleased(){
+	cutProgress = 0;
+
 	if(draggingPiece === 'carrotTop' && isInsidePan(
-		dragX + carrotTop.width / 2,
-		dragY + carrotTop.height / 2)){
+		dragX + carrotTop.width * sceneScale / 2,
+		dragY + carrotTop.height * sceneScale / 2)){
 		carrotTopPlaced = true;
 		carrotSlice2Unlocked = true;
 	}else if(draggingPiece === 'carrotSlice2' && isInsidePan(
-		slice2X + carrotSlice2.width / 2,
-		slice2Y + carrotSlice2.height / 2)){
+		slice2X + carrotSlice2.width * sceneScale / 2,
+		slice2Y + carrotSlice2.height * sceneScale / 2)){
 		carrotSlice2Placed = true;
 		carrotSlice3Unlocked = true;
 	}else if(draggingPiece === 'carrotSlice3' && isInsidePan(
-		slice3X + carrotSlice3.width / 2,
-		slice3Y + carrotSlice3.height / 2)){
+		slice3X + carrotSlice3.width * sceneScale / 2,
+		slice3Y + carrotSlice3.height * sceneScale / 2)){
 		carrotSlice3Placed = true;
 		carrotSlice4Unlocked = true;
 	}else if(draggingPiece === 'carrotSlice4' && isInsidePan(
-		slice4X + carrotSlice4.width / 2,
-		slice4Y + carrotSlice4.height / 2)){
+		slice4X + carrotSlice4.width * sceneScale / 2,
+		slice4Y + carrotSlice4.height * sceneScale / 2)){
 		carrotSlice4Placed = true;
 		carrotSlice5Unlocked = true;
 	}else if(draggingPiece === 'carrotSlice5' && isInsidePan(
-		slice5X + carrotSlice5.width / 2,
-		slice5Y + carrotSlice5.height / 2)){
+		slice5X + carrotSlice5.width * sceneScale / 2,
+		slice5Y + carrotSlice5.height * sceneScale / 2)){
 		carrotSlice5Placed = true;
 	}
 	draggingPiece = null;
