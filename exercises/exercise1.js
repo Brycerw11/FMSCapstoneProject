@@ -173,7 +173,7 @@ function handlePointerDown() {
 
 	if (currentOutlineTarget.gameEnded) {
 		currentOutlineTarget = {
-			type: ["rectangle","circle"][random(0, 1)],
+			type: ["rectangle","circle"][random([0, 1])],
 			//diameter/size is determined below based on type
 			x: gameWidth/2,
 			y: gameHeight/2,
@@ -367,9 +367,7 @@ function handlePointerUp() {
 			drawAccuracy: currentOutlineTarget.accuracy,
 			dragAccuracy: currentOutlineTarget.dropAccuracy,
 		};
-		const currentAttempts = JSON.parse(localStorage.getItem("exercise1Attempts") || "[]");
-		currentAttempts.push(gameStats);
-		localStorage.setItem("exercise1Attempts", JSON.stringify(currentAttempts));
+		//localStorage.setItem("exercise1Attempts", JSON.stringify(gameStats));
 	}
 }
 
