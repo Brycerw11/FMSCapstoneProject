@@ -316,7 +316,7 @@ function drawGame1() {
 
 		textSize(50);
 		fill(30);
-		text("Nicely Done! You made Sauteed Carrots!", width/2-300, height/2-400);
+		text("Nicely Done! You made Sauteed Carrots! ", width/2-300, height/2-400);
 		
 		strokeWeight(2);
 		stroke(4);
@@ -325,8 +325,8 @@ function drawGame1() {
 
 		strokeWeight(0);
 		fill(255)
-		textSize(40)
-		text('Restart', width/2-20, height/2-220)
+		textSize(26)
+		text('Restart (SCREEN WIP)', width/2-80, height/2-220)
 
 		finalScreen = true;
 		
