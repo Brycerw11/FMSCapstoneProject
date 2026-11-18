@@ -9,7 +9,6 @@ const drawingToleranceR = 40;
 
 let currentOutlineTarget = null;
 
-
 const gameWidth = document.body.offsetWidth;
 const gameHeight = document.body.offsetHeight;
 
@@ -26,7 +25,7 @@ function setup() {
 		diameter: 250,
 		x: gameWidth/2,
 		y: gameHeight/2,
-		accuracy: null,
+		accuracy: null, // drawing accuracy
 		targetHole: null,
 		userPoints: [],
 		userPointsResampled: [],
@@ -43,13 +42,20 @@ function setup() {
 			startY: null,
 			offsetX: 0,
 			offsetY: 0
-		}
+		},
+		gameEnded: false,
+		gameEndedAt: null,
 	};
+
+	// drawing = false;
+	// TODO: figure out why user can draw immediately after clicking for new game
 
 	targetPoints = shapeToVector(pointCount);
 }
 
 // let targetPoints;
+
+// TODO: remove highlighting as soon as game ends. no animation.
 
 const pointCount = 30;
 
@@ -82,15 +88,52 @@ function draw() {
 		);
 		if (targetShapeAlpha > 0) drawTargetShape(targetShapeAlpha);
 		drawUserOutline();
+		if (currentOutlineTarget.gameEnded) {
+			const {
+				accuracy: drawAccuracy,
+				dropAccuracy: dragAccuracy
+			} = currentOutlineTarget;
+
+			const drawAccuracyFormatted = Math.round(drawAccuracy*100*100)/100+"%";
+			const dragAccuracyFormatted = Math.round(dragAccuracy*100*100)/100+"%";
+			
+			push();
+			// noStroke();
+			stroke(0, 0, 0, 127);
+			strokeWeight(2);
+			fill(255, 255, 255, 200);
+			const gameResultsWidth = 600;
+			const gameResultsHeight = 300;
+			const gameResultsX = gameWidth/2-600/2;
+			const gameResultsY = gameHeight/2-250/2;
+			rect(gameResultsX, gameResultsY, gameResultsWidth, gameResultsHeight, 10);
+			noStroke();
+
+			textAlign(LEFT, TOP);
+			textSize(40);
+			fill(0);
+			textStyle(BOLD);
+			text(`Game Results`, gameResultsX+20, gameResultsY+20);
+			textStyle(NORMAL);
+			text(`Drawing Accuracy: ${drawAccuracyFormatted}`, gameResultsX+20, gameResultsY+80);
+			text(`Drag Accuracy: ${dragAccuracyFormatted}`, gameResultsX+20, gameResultsY+130);
+			textStyle(ITALIC);
+			text(`Good job!`, gameResultsX+20, gameResultsY+190);
+			text(`Press anywhere to play again.`, gameResultsX+20, gameResultsY+240);
+
+			pop();
+		}
 	}
 
 	if (debugMode) {
+		push();
 		drawPoints(targetPoints, "orange");
 		if (currentOutlineTarget.userPointsResampled)
 			drawPoints(currentOutlineTarget.userPointsResampled, "purple");
 		textSize(40);
 		if (currentOutlineTarget.accuracy !== null)
 			text(`${currentOutlineTarget.accuracy.toFixed(2)}%`, 100, 100);
+		pop();
 	}
 }
 
@@ -128,7 +171,43 @@ function getLastDrawnPoint() {
 function handlePointerDown() {
 	console.log("mouse pressed");
 
-	if (currentOutlineTarget.closedAt) {
+	if (currentOutlineTarget.gameEnded) {
+		currentOutlineTarget = {
+			type: ["rectangle","circle"][random(0, 0)],
+			//diameter/size is determined below based on type
+			x: gameWidth/2,
+			y: gameHeight/2,
+			accuracy: null, // drawing accuracy
+			targetHole: null,
+			userPoints: [],
+			userPointsResampled: [],
+			userCenterX: null,
+			userCenterY: null,
+			userCanDrop: false,
+			dropAccuracy: 0,
+			almostClosedAt: null,
+			closedAt: null,
+			offsetX: 0,
+			offsetY: 0,
+			dragInfo: {
+				startX: null,
+				startY: null,
+				offsetX: 0,
+				offsetY: 0
+			},
+			gameEnded: false,
+			gameEndedAt: null,
+		};
+
+		if (currentOutlineTarget.type === "rectangle") {
+			currentOutlineTarget.width = random(200, 400);
+			currentOutlineTarget.height = random(200, 400);
+		} else if (currentOutlineTarget.type === "circle") {
+			currentOutlineTarget.diameter = random(200, 300);
+		}
+
+		targetPoints = shapeToVector(pointCount);
+	} else if (currentOutlineTarget.closedAt) {
 		const collisionPolyVectors = [
 			...currentOutlineTarget.userPoints.map(point =>
 				createVector(
@@ -167,6 +246,8 @@ function handlePointerDown() {
 }
 
 function handlePointerDrag() {
+	if (currentOutlineTarget.gameEnded) return;
+
 	if (
 		currentOutlineTarget.closedAt &&
 		currentOutlineTarget.dragInfo.startX !== null &&
@@ -208,8 +289,8 @@ function handlePointerDrag() {
 
 		if (
 			distance <= drawingToleranceR*0.8 &&
-			!currentOutlineTarget.almostClosedAt
-			// currentOutlineTarget.userPoints.length > 50
+			!currentOutlineTarget.almostClosedAt &&
+			currentOutlineTarget.userPoints.length > 50
 		) {
 			currentOutlineTarget.almostClosedAt = Date.now();
 		} else if (distance > (drawingToleranceR)) {
@@ -231,7 +312,7 @@ function handlePointerUp() {
 		currentOutlineTarget.dragInfo.startY = null;
 		currentOutlineTarget.dragInfo.offsetX = null;
 		currentOutlineTarget.dragInfo.offsetY = null;
-	} else if (!currentOutlineTarget.closedAt) {
+	} else if (!currentOutlineTarget.closedAt) { // if user is still drawing
 		// console.log(currentOutlineTarget.almostClosedAt)
 
 		if (currentOutlineTarget.almostClosedAt) {
@@ -275,6 +356,19 @@ function handlePointerUp() {
 			// console.log("center y: " + centerY);
 		}
 	}
+
+	if (currentOutlineTarget.userCanDrop) {
+		console.log("can drop");
+		console.log(currentOutlineTarget.dropAccuracy);
+		currentOutlineTarget.userCanDrop = false;
+		currentOutlineTarget.gameEnded = true;
+		currentOutlineTarget.gameEndedAt = Date.now();
+		const gameStats = {
+			drawAccuracy: currentOutlineTarget.accuracy,
+			dragAccuracy: currentOutlineTarget.dropAccuracy,
+		};
+		//localStorage.setItem("exercise1Attempts", JSON.stringify(gameStats));
+	}
 }
 
 function drawTargetShape(alpha) {
@@ -289,6 +383,13 @@ function drawTargetShape(alpha) {
 			currentOutlineTarget.x,
 			currentOutlineTarget.y,
 			currentOutlineTarget.diameter
+		);
+	} else if (currentOutlineTarget.type === "rectangle") {
+		rect(
+			currentOutlineTarget.x-currentOutlineTarget.width/2,
+			currentOutlineTarget.y-currentOutlineTarget.height/2,
+			currentOutlineTarget.width,
+			currentOutlineTarget.height
 		);
 	}
 
@@ -309,7 +410,7 @@ function drawUserOutline() {
 		fill(
 			0, 255, 0,
 			(30+Math.min(60, (Date.now()-currentOutlineTarget.closedAt)/3))*
-			(currentOutlineTarget.userCanDrop ? (1-currentOutlineTarget.dropAccuracy) : 1)
+			((currentOutlineTarget.userCanDrop || currentOutlineTarget.gameEnded) ? (1-currentOutlineTarget.dropAccuracy) : 1)
 		);
 	}
 	beginShape();
@@ -374,19 +475,33 @@ function drawHole() {
 
 	drawingContext.globalAlpha = targetShapeAlpha;
 
-	console.log(targetShapeAlpha)
+	// console.log(targetShapeAlpha);
 
-	if (currentOutlineTarget.userCanDrop) {
-		fill(0, 255, 0, currentOutlineTarget.dropAccuracy * 150);
+	const fillAlphaFadePercent = Math.max(
+		currentOutlineTarget.gameEnded ? (1-(Date.now()-currentOutlineTarget.gameEndedAt)/80) : 1,
+		0
+	);
+
+	if (currentOutlineTarget.userCanDrop || currentOutlineTarget.gameEnded) {
+		fill(0, 255, 0, currentOutlineTarget.dropAccuracy * 150 * fillAlphaFadePercent);
 	} else {
 		fill(220);
 	}
 	// fill(255, 0, 0);
-	circle(
-		targetHole.x,
-		targetHole.y,
-		currentOutlineTarget.diameter
-	);
+	if (currentOutlineTarget.type === "circle") {
+		circle(
+			targetHole.x,
+			targetHole.y,
+			currentOutlineTarget.diameter
+		);
+	} else if (currentOutlineTarget.type === "rectangle") {
+		rect(
+			targetHole.x-currentOutlineTarget.width/2,
+			targetHole.y-currentOutlineTarget.height/2,
+			currentOutlineTarget.width,
+			currentOutlineTarget.height
+		);
+	}
 
 	// console.log(alpha);
 	stroke(0);
@@ -410,6 +525,22 @@ function drawHole() {
 			targetHole.y,
 			currentOutlineTarget.diameter*1.3
 		);
+	} else if (currentOutlineTarget.type === "rectangle") {
+		// fill("black");
+		// console.table({	
+		// 	targetX: targetHole.x,
+		// 	targetY: targetHole.y,
+		// 	x:targetHole.x-currentOutlineTarget.width/2,
+		// 	y:targetHole.y-currentOutlineTarget.height/2,
+		// 	width:currentOutlineTarget.width,
+		// 	height:currentOutlineTarget.height})
+		// fill(0);
+		// rect(
+		// 	targetHole.x-currentOutlineTarget.width/2+10,
+		// 	targetHole.y-currentOutlineTarget.height/2+10,
+		// 	currentOutlineTarget.width-20,
+		// 	currentOutlineTarget.height-20
+		// );
 	}
 
 	drawingContext.restore();
@@ -445,6 +576,68 @@ function shapeToVector(numPoints) {
 				y: y + radius * Math.sin(radians)
 			});
 		}
+	} else if (currentOutlineTarget.type === "rectangle") {
+		const width = currentOutlineTarget.width;
+		const height = currentOutlineTarget.height;
+
+		const topY = currentOutlineTarget.y-height/2;
+		const bottomY = currentOutlineTarget.y+height/2;
+		const leftX = currentOutlineTarget.x-width/2;
+		const rightX = currentOutlineTarget.x+width/2;
+		
+		const perimeter = width*2+height*2;
+		const incrementDistance = perimeter/numPoints;
+
+		// let lastX = topLeftX;
+		// let lastY = topLeftY;
+		// let elapsedDistance = 0;
+
+		// points.push({ x: lastX, y: lastY });
+
+		// for (let elapsedDistance = 0; elapsedDistance < perimeter; lastX += incrementDistance) {
+		// 	lastX += incrementDistance;
+		// 	points.push({ x: lastX, y: lastY });
+		// }
+
+		// if (lastX !== topRightX || lastY !== topRightY) {
+		// 	lastX = topRightX;
+		// 	lastY = topRightY;
+		// 	points.push({ x: topRightX, y: topRightY });
+		// }
+
+		// let distance;
+		// let lastX = topLeftX;
+		// let lastY = topLeftY;
+		// let elapsedDistance = 0;
+
+		for (let i = 0; i < numPoints; i++) {
+			const targetDistance = i * incrementDistance;
+			if (targetDistance < width) {
+				points.push({
+					x: leftX + targetDistance,
+					y: topY,
+				});
+			} else if (targetDistance < width + height) {
+				points.push({
+					x: rightX,
+					y: topY + (targetDistance - width),
+				});
+			} else if (targetDistance < 2*width + height) {
+				points.push({
+					x: rightX - (targetDistance - (width+height)),
+					y: bottomY,
+				});
+			} else {
+				points.push({
+					x: leftX,
+					y: topY + height - (targetDistance - (2*width + height)),
+				});
+			}
+		}
+
+		// points.push({ x: topRightX, y: topRightY });
+		// points.push({ x: bottomRightX, y: bottomRightY });
+		// points.push({ x: bottomLeftX, y: bottomLeftY });
 	}
 
 	console.log(points);
@@ -572,12 +765,14 @@ function compareShapes(shapeA, shapeB) {
 	console.log(`1: ${accuracyPercentDir1}%`);
 	console.log(`2: ${accuracyPercentDir2}%`);
 
-	const accuracyPercent = Math.round(
-		Math.max(accuracyPercentDir1, accuracyPercentDir2)
-		*100
-	)/100;
+	// const accuracyPercent = Math.round(
+	// 	Math.max(accuracyPercentDir1, accuracyPercentDir2)
+	// 	*100
+	// )/100;
 
-	return accuracyPercent;
+	const accuracyPercent = Math.max(accuracyPercentDir1, accuracyPercentDir2);
+
+	return accuracyPercent/100;
 }
 
 function drawPoints(points, fillColor) {
