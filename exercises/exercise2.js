@@ -189,6 +189,8 @@ function drawInfo(){
 	fill(255)
 	textSize(20)
 	text('Begin Cooking: Sauteed Carrots', width/2-90,height/2-220)
+	text('(Note: drag slowly while cutting)', width/2-90,height/2-190)
+
 }
 
 function checkCut(){
