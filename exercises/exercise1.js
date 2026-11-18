@@ -367,7 +367,9 @@ function handlePointerUp() {
 			drawAccuracy: currentOutlineTarget.accuracy,
 			dragAccuracy: currentOutlineTarget.dropAccuracy,
 		};
-		//localStorage.setItem("exercise1Attempts", JSON.stringify(gameStats));
+		const exerciseAttempts = JSON.parse(localStorage.getItem("exercise1Attempts") || "[]");
+		exerciseAttempts.push(gameStats);
+		localStorage.setItem("exercise1Attempts", JSON.stringify(exerciseAttempts));
 	}
 }
 
