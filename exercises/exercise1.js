@@ -173,7 +173,7 @@ function handlePointerDown() {
 
 	if (currentOutlineTarget.gameEnded) {
 		currentOutlineTarget = {
-			type: ["rectangle","circle"][random(0, 0)],
+			type: ["rectangle","circle"][random(0, 1)],
 			//diameter/size is determined below based on type
 			x: gameWidth/2,
 			y: gameHeight/2,
