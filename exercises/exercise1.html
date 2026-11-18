@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Awsome Shape Drawing Game</title>
+	<link rel="icon" href="../assets/images/sitewideImages/favicon.ico" sizes="any">
+	<link rel="icon" type="image/svg+xml" href="../assets/images/sitewideImages/favicon.svg">
+
 	<link rel="stylesheet" type="text/css" href="../style.css" />
 
     <!-- Import Kanit Font -->
@@ -21,16 +24,19 @@
     <!-- p5.js Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.js"></script>
     <script src="exercise1.js"></script>
+
+    <!-- p5.collide2D Script -->
+    <script defer src="https://unpkg.com/p5.collide2d"></script>
     
     <!-- Nav Bar -->
     <nav id="nav-bar-container" class="kanit">
         <div id="nav-bar-contents">
             <div id="nav-bar-header">
                 <div id="logo-container">
-				    <img id="logo-image" src="https://www.svgrepo.com/show/508699/landscape-placeholder.svg" alt="{Site Name} Logo" id="logo">
+				    <img id="logo-image" src="../assets/images/sitewideImages/FineMotorSkillsSiteLogo.svg" alt="Fine Motor Academy Logo" id="logo" onclick="window.location.href='../index.html'">
 			    </div>
 
-				<h1 id="site-title" class="nav-bar-title kanit">Website Name</h1>
+				<h1 id="site-title" class="nav-bar-title kanit">Fine Motor Academy</h1>
 				<h2 id="page-title" class="nav-bar-title kanit">Games</h2>
             </div>
             <a class="nav-bar-button kanit" href="../index.html">Home</a>

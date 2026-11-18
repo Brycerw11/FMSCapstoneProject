@@ -13,6 +13,26 @@ canvas {
     display: block;
 }
 
+/* #region Sitewide CSS Helper classes*/
+.justify-center{
+    display: flex;
+    justify-content: center;
+}
+
+.text-center{
+    text-align: center;
+}
+
+.fw-400{
+    font-weight: 400;
+}
+
+.margin-bottom-0{
+    margin-bottom: 0;
+}
+
+/* #endregion */
+
 /* #region Kanit CSS Font Styles */
 
 .kanit{
@@ -20,6 +40,7 @@ canvas {
 }
 
 /* #endregion */
+
 
 /* #region Site Header CSS */
 header{
@@ -43,9 +64,13 @@ header #logo-container{
 #logo-image{
     width: 9vh;
     height: 9vh;
+    padding: 0.4rem;
+    background-color: #45818e;
 
     border: 3px #FFFFFF solid;
     border-radius: 100%;
+
+    cursor: pointer;
 }
 
 header#site-title-container{
@@ -77,6 +102,7 @@ header h1, header h2{
     }
 }
 /* #endregion */
+
 
 /* #region Homepage Content CSS */
 /*Buttons*/
@@ -114,9 +140,11 @@ header h1, header h2{
 
 /* #endregion */
 
+
 /* #region Side Navbar CSS */
 #nav-bar-container{
     position: fixed;
+    z-index: 5;
 }
 
 #nav-bar-show-button{
@@ -129,6 +157,7 @@ header h1, header h2{
     left: -40px;
 
     width: fit-content;
+    z-index: 4 !important;
 
     padding-left: 3rem;
     padding-right: 1rem;
@@ -157,6 +186,11 @@ header h1, header h2{
     background-color: #76A5AF;
 
     overflow: auto;
+}
+
+#nav-bar-contents.headerless-nav-bar{
+    justify-content: space-evenly;
+    max-height: 82vh;
 }
 
 #nav-bar-contents #logo-container{
@@ -203,6 +237,7 @@ header h1, header h2{
 }
 
 /* #endregion */
+
 
 /* #region - game selection page */
 .center-content {
@@ -259,4 +294,96 @@ header h1, header h2{
     justify-content: center;
     margin: 0 auto;
 }
+/* #endregion */
+
+
+/* #region Metrics Page CSS */
+
+#metrics-page-content{
+    padding: 1.5em;
+    font-size: 1.1rem;
+}
+
+.extra-margin-top{
+    margin-top: 2.5em;
+}
+
+.metrics-container p{
+    text-indent: 1em;
+    font-weight: 550;
+
+    margin-top: 0 1rem 0 1rem;
+}
+
+.metrics-container span{
+    text-indent: 1em;
+    font-weight: 400;
+}
+
+#reset-metrics-button{
+    padding: 0.25em 1em 0.25em 1em;
+    border-radius: 16px;
+
+    font-size: 1em;
+}
+
+/* #endregion */
+
+
+/* #region Settings Page CSS */
+
+#settings-content{
+    /* display: flex;
+    justify-content: center;
+     */
+    padding: 1rem;
+    padding-top: 3rem;
+    
+    font-size: 1.1rem;
+}
+
+.setting-container{
+    margin: 1em;
+}
+
+#settings-content .settings-label{
+    margin: 0 0.5rem 0 0;
+}
+
+#settings-content .slider{
+    width: 2em;
+    height: fit-content;
+
+    padding: 0.15em;
+
+    border: 2px solid #FFFFFF;
+    border-radius: 16px;
+
+    background-color: #CCCCCC;
+    transition: background-color 0.5s;
+}
+#settings-content .slider-handle{
+    height: 1em;
+    width: 1em;
+
+    border-radius: 100%;
+
+    background-color: #FFFFFF;
+
+    transition: margin-left 0.5s;
+}
+#settings-content .slider.slider-on{ background-color: #2196F3; }
+#settings-content .slider.slider-on .slider-handle{
+    margin-left: 1em;
+}
+
+#settings-content button{
+    margin: 1em 0 0 0;
+    padding: 0.25em 1em 0.25em 1em;
+    border-radius: 16px;
+
+    font-size: 1em;
+}
+
+
 /* #endregion */

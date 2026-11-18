@@ -4,7 +4,9 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<title>Settings - FMS Capstone Project</title>
+	<title>Settings - Fine Motor Academy</title>
+	<link rel="icon" href="./assets/images/sitewideImages/favicon.ico" sizes="any">
+	<link rel="icon" type="image/svg+xml" href="./assets/images/sitewideImages/favicon.svg">
 
 	<link rel="stylesheet" type="text/css" href="style.css" />
 
@@ -28,27 +30,19 @@
 	<!-- Site Header -->
 	<header>
 		<div id="logo-container">
-			<img id="logo-image" src="https://www.svgrepo.com/show/508699/landscape-placeholder.svg" alt="{Site Name} Logo" id="logo">
+			<img id="logo-image" src="./assets/images/sitewideImages/FineMotorSkillsSiteLogo.svg" alt="Fine Motor Academy Logo" id="logo" onclick="window.location.href='index.html'">
 		</div>
 		<div class="center-content">
 			<div id="site-title-container">
-				<h1 id="site-title" class="kanit">Website Name</h1>
+				<h1 id="site-title" class="kanit">Fine Motor Academy</h1>
 				<h2 id="page-title" class="kanit">Settings</h2>
 			</div>
 		</div>
 	</header>
 
 	<!-- Nav Bar -->
-    <nav id="nav-bar-container" class="kanit">
-        <div id="nav-bar-contents">
-            <div id="nav-bar-header">
-                <div id="logo-container">
-				    <img id="logo-image" src="https://www.svgrepo.com/show/508699/landscape-placeholder.svg" alt="{Site Name} Logo" id="logo">
-			    </div>
-
-				<h1 id="site-title" class="nav-bar-title kanit">Website Name</h1>
-				<h2 id="page-title" class="nav-bar-title kanit">Settings</h2>
-            </div>
+    <nav id="nav-bar-container" class="kanit start-showing">
+        <div id="nav-bar-contents" class="headerless-nav-bar">
             <a class="nav-bar-button kanit" href="index.html">Home</a>
             <a class="nav-bar-button kanit" href="./exerciseSelection.html">Games</a>
             <a class="nav-bar-button kanit" href="./metrics.html">Metrics</a>
@@ -59,8 +53,29 @@
 	<script src="./navBar.js"></script>
 
 	<!-- Page Content -->
-		
-		
+	<div id="settings-content" class="kanit">
+		<!-- Audio Toggle Setting -->
+		<div class="justify-center setting-container">
+			<p class="settings-label">Audio Toggle: </p>
+			<div id="audio-toggle-slider" class="slider slider-on inline">
+				<div class="slider-handle"></div>
+			</div>
+		</div>
 
+		<!-- Audio Volume Setting -->
+		<div class="justify-center setting-container">
+			<p class="settings-label">Volume: </p>
+			<input type="range" name="volume" id="volume-range" min="0" max="100" value="75" class="inline">
+		</div>
+
+		<!-- TODO: Music Toggle Setting -->
+
+		<!-- TODO: Clear Settings Button -->
+		<div class="justify-center setting-container">
+			<button onclick="setDefaultSettings(true)">Reset Settings</button>
+		</div>
+	</div>
+		
+	<script src="./assets/scripts/settings.js"></script>
 </body>
 </html>
