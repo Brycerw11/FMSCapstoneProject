@@ -360,7 +360,7 @@ function nextRound(){
 
 	totalProgress = 0;
 	highestRoundProgress = 0;
-	globalMoveSpeed = nextRoundShapeSpeed;
+	globalMoveSpeed = nextRoundShapeSpeed * (gameWidth / 1463.0);
 	inRound = true;
 
 	pointerMap.clear();
