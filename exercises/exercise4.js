@@ -92,6 +92,12 @@ window.addEventListener("resize", function(){
 	});
 // #endregion
 
+// Enable the start game button after 3 seconds to ensure the the sure has read the instructions
+setTimeout(function(){
+	document.getElementById("start-button").disabled = false;
+}, 3000);
+
+
 // Start new game function
 function startGame(){
 	roundNum = 1;
@@ -321,9 +327,9 @@ function showRoundCompletePanel(){
 		let nextRoundShapeSizeLabel = `${nextRoundShapeSize * 100}%`;
 		let nextRoundShapeSpeedLabel = (nextRoundShapeSpeed == 0)? `` : `, moving at ${nextRoundShapeSpeed} units/second`;
 
-		let nextRoundStatusString = `Round ${roundNum + 1} is next! It will have ${nextRoundShapes} shapes at ${nextRoundShapeSizeLabel} of their maximum size${nextRoundShapeSpeedLabel}. You'll have ${nextRoundTimer / 1000} seconds to complete it.\nIf you wish to stop playing press the "Quit to Game Selection" button to properly save this game to your metrics.`;
+		let nextRoundStatusString = `Round ${roundNum + 1} is next! It will have ${nextRoundShapes} shapes at ${nextRoundShapeSizeLabel} of their maximum size${nextRoundShapeSpeedLabel}. You'll have ${nextRoundTimer / 1000} seconds to complete it. <br> If you wish to stop playing press the "Quit to Game Selection" button to properly save this game to your metrics.`;
 		$("#next-round-info-text").show();
-		$("#next-round-info-text").text(nextRoundStatusString);
+		$("#next-round-info-text").html(nextRoundStatusString);
 		$("#next-round-button").text("Next Round")
 		roundNum++;
 
