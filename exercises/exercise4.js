@@ -56,6 +56,7 @@ window.addEventListener("resize", function(){
 // #region Pointer tracking setup and functions
 	// Create a collection of pointers that show where the user is pressing the touch screen
 	const pointerMap = new Map();
+	var touchScreenWarnTimeout;
 
 	window.addEventListener("pointerdown", (evt) =>{
 		if (evt.pointerType != "mouse"){
@@ -65,6 +66,17 @@ window.addEventListener("resize", function(){
 			};
 
 			pointerMap.set(evt.pointerId, pointerObj);
+		}
+		else{
+			if(!inRound){return;}
+			
+			// Warn the user that this exercise requires the use of a touchscreen for two seconds
+			$("#touchscreen-notice").css("opacity", "100");
+
+			if(touchScreenWarnTimeout != null){clearTimeout(touchScreenWarnTimeout);}
+			touchScreenWarnTimeout = setTimeout(() => {
+				$("#touchscreen-notice").css("opacity", "0");
+			}, 2000);
 		}
 	});
 	window.addEventListener("pointermove", (evt) =>{
@@ -128,7 +140,7 @@ function setup() {
 // #endregion
 
 
-// #region Game Loop
+// #region Game Loop Functions
 
 // Function to create a new shape list
 function generateShapeList(numShapes, sizeInPx){
@@ -268,6 +280,9 @@ function moveShapes(){
 		}
 	}
 }
+// #endregion
+
+// #region Round Progression Functions
 
 // Update the round info pane
 function updateRoundInfoPane(){
@@ -306,7 +321,7 @@ function showRoundCompletePanel(){
 		let nextRoundShapeSizeLabel = `${nextRoundShapeSize * 100}%`;
 		let nextRoundShapeSpeedLabel = (nextRoundShapeSpeed == 0)? `` : `, moving at ${nextRoundShapeSpeed} units/second`;
 
-		let nextRoundStatusString = `Round ${roundNum + 1} is next! It will have ${nextRoundShapes} shapes at ${nextRoundShapeSizeLabel} of their maximum size${nextRoundShapeSpeedLabel}. You'll have ${nextRoundTimer / 1000} seconds to complete it.`;
+		let nextRoundStatusString = `Round ${roundNum + 1} is next! It will have ${nextRoundShapes} shapes at ${nextRoundShapeSizeLabel} of their maximum size${nextRoundShapeSpeedLabel}. You'll have ${nextRoundTimer / 1000} seconds to complete it.\nIf you wish to stop playing press the "Quit to Game Selection" button to properly save this game to your metrics.`;
 		$("#next-round-info-text").show();
 		$("#next-round-info-text").text(nextRoundStatusString);
 		$("#next-round-button").text("Next Round")
@@ -318,7 +333,6 @@ function showRoundCompletePanel(){
 	// Show the round complete panel
 	$("#round-complete-panel").show();
 }
-
 
 const roundProgression = [
 	{numShapes: 3, time: 60000, shapeSpeed: 0, shapeSize: 1,},      //round 1
@@ -360,11 +374,41 @@ function nextRound(){
 
 	totalProgress = 0;
 	highestRoundProgress = 0;
-	globalMoveSpeed = nextRoundShapeSpeed;
+	globalMoveSpeed = nextRoundShapeSpeed * (gameWidth / 1463.0);
 	inRound = true;
 
 	pointerMap.clear();
 }
+
+function quit(){
+	// If the user won the last round confirm that they want to quit
+	if(timeRemaining > 0){
+		if(confirm("Are you sure that you want to quit to the game selection page? \n\nThis will end your current game!")){
+			// Save the current game into the metrics, showing that they beat this round
+			highestRoundProgress = 0;
+			addGameToMetrics();
+
+			// Move them to the exercise selection screen
+			window.location.href = "../exerciseSelection.html";
+		}
+	}
+	else{
+		// The user lost and the game was already recorded 
+		// so just move them to the exercise selection screen
+		window.location.href = "../exerciseSelection.html";
+	}
+}
+
+// Event listner to warn the user if they close the tab while they have an unfinished game
+window.addEventListener("beforeunload", (evt) => {
+	// If in game, save the unfinished game to metrics
+	if(inGame){
+		addGameToMetrics();
+	}
+});
+
+// endregion
+
 
 // #region Primary Draw Function
 	function draw() {

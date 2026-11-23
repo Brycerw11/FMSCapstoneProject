@@ -64,9 +64,13 @@ header #logo-container{
 #logo-image{
     width: 9vh;
     height: 9vh;
+    padding: 0.4rem;
+    background-color: #45818e;
 
     border: 3px #FFFFFF solid;
     border-radius: 100%;
+
+    cursor: pointer;
 }
 
 header#site-title-container{
@@ -307,7 +311,7 @@ header h1, header h2{
 .metrics-container p{
     text-indent: 1em;
     font-weight: 550;
-    
+
     margin-top: 0 1rem 0 1rem;
 }
 
@@ -334,6 +338,8 @@ header h1, header h2{
      */
     padding: 1rem;
     padding-top: 3rem;
+    
+    font-size: 1.1rem;
 }
 
 .setting-container{
@@ -372,8 +378,11 @@ header h1, header h2{
 }
 
 #settings-content button{
+    margin: 1em 0 0 0;
     padding: 0.25em 1em 0.25em 1em;
     border-radius: 16px;
+
+    font-size: 1em;
 }
 
 
