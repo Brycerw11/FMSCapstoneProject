@@ -4,6 +4,33 @@
 
 let debugMode = false;
 
+const audios = {
+	drawing_a_line: new Audio("../assets/audio/drawing_a_line.mp3"),
+	drawSuccess: new Audio("../assets/audio/draw_success.mp3"),
+	win: new Audio("../assets/audio/win.mp3"),
+	dun: new Audio("../assets/audio/dun.mp3"),
+	sus: new Audio("../assets/audio/sus.mp3"),
+};
+
+function playOnce(audio) {
+	audio.loop = false;
+	// if (audio.paused) {
+	audio.currentTime = 0;
+	audio.play();
+	// }
+}
+
+function playLoop(audio) {
+	audio.currentTime = 0;
+	audio.loop = true;
+	audio.play();
+}
+
+function stopAudio(audio) {
+	if (!audio.paused) audio.pause();
+}
+
+
 // the diameter within which the user can continue drawing if they accidentally lift their mouse (and the line will trail from last drawn point)
 const drawingToleranceR = 40;
 
@@ -172,6 +199,8 @@ function handlePointerDown() {
 	console.log("mouse pressed");
 
 	if (currentOutlineTarget.gameEnded) {
+		playOnce(audios.dun);
+
 		currentOutlineTarget = {
 			type: ["rectangle","circle"][random([0, 1])],
 			//diameter/size is determined below based on type
@@ -241,6 +270,7 @@ function handlePointerDown() {
 			drawing = false;
 		} else {
 			drawing = true;
+			playLoop(audios.drawing_a_line);
 		}
 	}
 }
@@ -302,6 +332,8 @@ function handlePointerDrag() {
 function handlePointerUp() {
 	console.log("mouse released");
 
+	stopAudio(audios.drawing_a_line);
+
 	if (
 		currentOutlineTarget.dragInfo.startX !== null ||
 		currentOutlineTarget.dragInfo.startY !== null
@@ -354,10 +386,17 @@ function handlePointerUp() {
 			currentOutlineTarget.userCenterY = (minY + maxY) / 2;
 			// console.log("center x: " + centerX);
 			// console.log("center y: " + centerY);
+
+			if (currentOutlineTarget.accuracy < 0.2) {
+				playOnce(audios.sus);
+			} else {
+				playOnce(audios.drawSuccess);
+			}
 		}
 	}
 
 	if (currentOutlineTarget.userCanDrop) {
+		playOnce(audios.win);
 		console.log("can drop");
 		console.log(currentOutlineTarget.dropAccuracy);
 		currentOutlineTarget.userCanDrop = false;
