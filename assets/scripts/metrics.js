@@ -9,6 +9,40 @@ $(function (){
 
     // #endregion
 
+    // #region Load Shape Drawing (e1) Metrics
+    let e1Games = JSON.parse(localStorage.getItem("exercise1Attempts"));
+    
+    if(e1Games !== null){
+		let sumDraw = 0;
+		let sumDrag = 0;
+        let bestDraw = 0;
+        let bestDrag = 0;
+
+        // Find metrics values
+        for(let game of e1Games){
+            sumDraw += game.drawAccuracy;
+            sumDrag += game.dragAccuracy;
+            if (game.drawAccuracy > bestDraw) bestDraw = game.drawAccuracy;
+            if (game.dragAccuracy > bestDrag) bestDrag = game.dragAccuracy;
+        }
+
+        let averageDraw = sumDraw / e1Games.length;
+        let averageDrag = sumDrag / e1Games.length;
+
+        const averageDrawFormatted = Math.round(averageDraw*100*100)/100+"%";
+        const averageDragFormatted = Math.round(averageDrag*100*100)/100+"%";
+        const bestDrawFormatted = Math.round(bestDraw*100*100)/100+"%";
+        const bestDragFormatted = Math.round(bestDrag*100*100)/100+"%";
+
+        // Display e1 metric values
+        $(".e1-best-draw-value").text(bestDrawFormatted);
+        $(".e1-best-drag-value").text(bestDragFormatted);
+        $(".e1-average-draw-value").text(averageDrawFormatted);
+        $(".e1-average-drag-value").text(averageDragFormatted);
+        $(".e1-completed-rounds-value").text(e1Games.length.toLocaleString()); // adds commas in case someone (somehow) completes thousands of games
+	}
+    // #endregion
+
     // #region Load Shape Balancing (e4) Metrics
     let e4MetricsListObj = JSON.parse(localStorage.getItem("Shape Balancing Metrics"));
     
