@@ -23,6 +23,10 @@
 
     <!-- Exercise4 exclusive CSS -->
     <style>
+        body{
+            background-color: #DCDCDC;
+        }
+
         .html-overlay{
             position: fixed;
             display: flex;
@@ -39,6 +43,27 @@
 
         button{
             border-radius: 8px;
+        }
+
+        #touchscreen-notice-container{
+            display: flex;
+            justify-content: center;
+        }
+        #touchscreen-notice{
+            position: fixed;
+            width: fit-content;
+            padding: 1em;
+            background-color: #a2c4c9;
+            border: white 3px solid;
+            border-radius: 16px;
+
+            font-weight: 500;
+
+            top: 1em;
+            z-index: 4;
+
+            opacity: 0;
+            transition: 1s;
         }
 
         /* #region instructions panel css */
@@ -73,6 +98,10 @@
             padding: 0.25em 0.5em 0.25em 0.5em;
             font-size: 1.1em;
             pointer-events: all;
+        }
+        #instructions-panel .touchscreen-disclaimer{
+            text-align: center;
+            font-weight: 500;
         }
         /* #endregion */
 
@@ -120,6 +149,8 @@
             z-index: 3 !important;
 
             font-weight: 400;
+
+            display: none;
         }
         #round-complete-panel > h2{
             text-align: center;
@@ -130,8 +161,9 @@
         }
         #next-round-button-container{
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             margin-bottom: 1em;
+            padding: 0 1.5em 0 1.5em;
         }
         #next-round-button-container button{
             padding: 0.25em 0.5em 0.25em 0.5em;
@@ -180,7 +212,7 @@
             <p id="instructions-text">
                 This is the Shape Balancing game! This game is spilt up into rounds. Your goal for each round is to press and hold on all of the shapes for three seconds. Rounds get progressively harder the further you go, with more shapes being added, shapes starting to move, and shapes getting smaller.  Try to make it through as many rounds as possible! 
             </p>
-            <p style="text-align: center; font-weight: 500;">
+            <p class="touchscreen-disclaimer">
                 This game requires the use of a touchscreen!
             </p>
             <br>
@@ -198,6 +230,7 @@
                 Round {n+1} is next. It will have n shapes and you'll have -- seconds to complete it.
             </p>
             <div id="next-round-button-container">
+                <button id="quit-button" onclick="quit()">Quit to Game Selection</button>
                 <button id="next-round-button" onclick="nextRound()">Next Round</button>
             </div>
         </div>
@@ -208,6 +241,12 @@
                 <p id="time-remaining-label">Time Remaining: </p>
                 <p id="time-label">60s</p>
             </div>
+        </div>
+    </div>
+
+    <div id="touchscreen-notice-container">
+        <div id="touchscreen-notice" class="kanit">
+            This exercise requires the use of a touchscreen!!
         </div>
     </div>
 
